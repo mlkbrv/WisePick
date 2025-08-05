@@ -2,7 +2,7 @@ from django.shortcuts import render
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
-
+from .ai import *
 from .models import CPU
 from .serializers import CPUSerializer
 
@@ -14,7 +14,6 @@ class CPUDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CPU.objects.all()
     serializer_class = CPUSerializer
 
-from .ai import *
 
 class CompareAPIView(APIView):
     def get(self, request, cpu1, cpu2):
