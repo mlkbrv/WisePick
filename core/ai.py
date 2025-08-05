@@ -15,9 +15,9 @@ from core.models import CPU
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
 cpu_promt = """
-Ты — помощник, который генерирует структурированные JSON-данные для визуализации барчартов на основе характеристик процессоров.
+You are an assistant that generates structured JSON data for bar chart visualization based on processor characteristics.
 
-Я передаю тебе список процессоров с такими полями:
+I provide you with a list of processors with the following fields:
 - name
 - clock_speed_ghz
 - core_count
@@ -29,18 +29,18 @@ cpu_promt = """
 - architecture_generation
 - ipc
 
-На основе этих данных сгенерируй JSON-массив, где каждый объект содержит:
+Based on this data, generate a JSON array where each object contains:
 
-- "name": название процессора
-- "cores_threads": строка в формате "{core_count}c / {thread_count}t"
-- "tdp": tdp_watts (в ваттах)
-- "clock_speed": clock_speed_ghz (в ГГц)
-- "l3_cache": cache_size_l3 (в МБ)
-- "performance_score": core_count × clock_speed_ghz × ipc (округлить до 2 знаков)
+- "name": processor name
+- "cores_threads": string in format "{core_count}c / {thread_count}t"
+- "tdp": tdp_watts (in watts)
+- "clock_speed": clock_speed_ghz (in GHz)
+- "l3_cache": cache_size_l3 (in MB)
+- "performance_score": core_count × clock_speed_ghz × ipc (rounded to 2 decimal places)
 
-Отсортируй по убыванию performance_score.
+Sort by performance_score in descending order.
 
-Верни ТОЛЬКО чистый JSON, без комментариев, пояснений и Markdown.
+Return ONLY clean JSON, without comments, explanations, or Markdown.
 """
 
 def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
@@ -69,7 +69,7 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
 
         api_key = os.getenv("OPENROUTER_API_KEY")
         if not api_key:
-            raise ValueError("OPENROUTER_API_KEY не найден")
+            raise ValueError("OPENROUTER_API_KEY not found")
 
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
@@ -80,7 +80,7 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
             json={
                 "model": "deepseek/deepseek-chat-v3-0324:free",
                 "messages": [
-                    {"role": "user", "content": cpu_promt + "\n\nДАННЫЕ:\n" + str(data)}
+                    {"role": "user", "content": cpu_promt + "\n\nDATA:\n" + str(data)}
                 ],
                 "temperature": 0.1
             }
@@ -92,11 +92,11 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
             cleaned = clean_json_response(content)
             return json.loads(cleaned)
         else:
-            print("Ошибка API:", response.status_code, response.text)
+            print("API Error:", response.status_code, response.text)
             return None
 
     except CPU.DoesNotExist as e:
-        print(f"CPU не найден: {e}")
+        print(f"CPU not found: {e}")
         return None
 
 def clean_json_response(text):

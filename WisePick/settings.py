@@ -56,7 +56,7 @@ ROOT_URLCONF = 'WisePick.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # если у тебя есть шаблоны на DTL
+        'DIRS': [BASE_DIR / 'templates'],  # if you have DTL templates
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

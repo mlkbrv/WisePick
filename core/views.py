@@ -20,5 +20,5 @@ class CompareAPIView(APIView):
     def get(self, request, cpu1, cpu2):
         data = get_cpu_comparison_json(cpu1, cpu2)
         if data is None:
-            return Response({"error": "Не удалось сравнить процессоры"}, status=400)
+            return Response({"error": "Failed to compare processors"}, status=400)
         return Response(data)
