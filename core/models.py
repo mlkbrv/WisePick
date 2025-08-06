@@ -14,3 +14,16 @@ class CPU(models.Model):
 
     def __str__(self):
         return self.name
+
+class GPU(models.Model):
+    name = models.CharField(max_length=255)
+    vram_gb = models.FloatField()
+    core_count = models.IntegerField()
+    core_clock_ghz = models.FloatField()
+    memory_bandwidth_gbps = models.FloatField()
+    architecture = models.CharField(max_length=255)
+    ray_tracing_support = models.BooleanField(default=False)
+    release_year = models.IntegerField()
+
+    def __str__(self):
+            return self.name

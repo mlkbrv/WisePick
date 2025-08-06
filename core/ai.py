@@ -1,4 +1,3 @@
-import matplotlib.pyplot as plt
 import json
 import os
 import sys
@@ -10,11 +9,17 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'WisePick.settings')
 django.setup()
 
-from core.models import CPU
+from core.models import CPU, GPU
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
-cpu_promt = """
+# =====GETAPIKEY=====
+api_key = os.getenv("OPENROUTER_API_KEY")
+if not api_key:
+    raise ValueError("OPENROUTER_API_KEY not found")
+
+# =====Promts=========
+cpu_prompt = """
 You are an assistant that generates structured JSON data for bar chart visualization based on processor characteristics.
 
 I provide you with a list of processors with the following fields:
@@ -42,6 +47,97 @@ Sort by performance_score in descending order.
 
 Return ONLY clean JSON, without comments, explanations, or Markdown.
 """
+gpu_prompt = """
+You are an assistant that generates structured JSON data for bar chart visualization based on GPU characteristics.
+
+I provide you with a list of GPUs with the following fields:
+- name
+- vram_gb
+- core_count
+- core_clock_ghz
+- memory_bandwidth_gbps
+- architecture
+- ray_tracing_support
+- release_year
+
+Based on this data, generate a JSON array where each object contains:
+
+- "name": GPU name
+- "vram": vram_gb (in GB)
+- "core_clock": core_clock_ghz (in GHz)
+- "memory_bandwidth": memory_bandwidth_gbps (in GB/s)
+- "ray_tracing": "Yes" if ray_tracing_support is True, otherwise "No"
+- "performance_score": core_count × core_clock_ghz × memory_bandwidth_gbps (rounded to 2 decimal places)
+
+Sort by performance_score in descending order.
+
+Return ONLY clean JSON, without comments, explanations, or Markdown.
+"""
+
+
+# =====Tools=====
+def clean_json_response(text):
+    text = text.strip()
+    if text.startswith("```json"):
+        text = text[7:]
+    if text.startswith("```"):
+        text = text[3:]
+    if text.endswith("```"):
+        text = text[:-3]
+    return text.strip()
+
+
+def get_gpu_comparison_json(gpu1_name: str, gpu2_name: str):
+    try:
+        gpu1 = GPU.objects.get(name=gpu1_name)
+        gpu2 = GPU.objects.get(name=gpu2_name)
+
+        data = [
+            {
+                "name": gpu1.name,
+                "vram_gb": float(gpu1.vram_gb),
+                "core_count": gpu1.core_count,
+                "core_clock_ghz": float(gpu1.core_clock_ghz),
+                "memory_bandwidth_gbps": float(gpu1.memory_bandwidth_gbps),
+                "ray_tracing_support": gpu1.ray_tracing_support,
+            },
+            {
+                "name": gpu2.name,
+                "vram_gb": float(gpu2.vram_gb),
+                "core_count": gpu2.core_count,
+                "core_clock_ghz": float(gpu2.core_clock_ghz),
+                "memory_bandwidth_gbps": float(gpu2.memory_bandwidth_gbps),
+                "ray_tracing_support": gpu2.ray_tracing_support,
+            }
+        ]
+
+        response = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "deepseek/deepseek-chat-v3-0324:free",
+                "messages": [
+                    {"role": "user", "content": gpu_prompt + "\n\nDATA:\n" + str(data)}
+                ],
+                "temperature": 0.1
+            }
+        )
+        if response.status_code == 200:
+            result = response.json()
+            content = result['choices'][0]['message']['content']
+            cleaned = clean_json_response(content)
+            return json.loads(cleaned)
+        else:
+            print("API Error:", response.status_code, response.text)
+            return None
+
+    except GPU.DoesNotExist as e:
+        print(f"GPU not found: {e}")
+        return None
+
 
 def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
     try:
@@ -67,10 +163,6 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
             }
         ]
 
-        api_key = os.getenv("OPENROUTER_API_KEY")
-        if not api_key:
-            raise ValueError("OPENROUTER_API_KEY not found")
-
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -80,7 +172,7 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
             json={
                 "model": "deepseek/deepseek-chat-v3-0324:free",
                 "messages": [
-                    {"role": "user", "content": cpu_promt + "\n\nDATA:\n" + str(data)}
+                    {"role": "user", "content": cpu_prompt + "\n\nDATA:\n" + str(data)}
                 ],
                 "temperature": 0.1
             }
@@ -98,13 +190,3 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
     except CPU.DoesNotExist as e:
         print(f"CPU not found: {e}")
         return None
-
-def clean_json_response(text):
-    text = text.strip()
-    if text.startswith("```json"):
-        text = text[7:]
-    if text.startswith("```"):
-        text = text[3:]
-    if text.endswith("```"):
-        text = text[:-3]
-    return text.strip()
