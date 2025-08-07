@@ -4,12 +4,11 @@ import sys
 import django
 import requests
 from dotenv import load_dotenv
+from core.models import CPU, GPU, RAM
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'WisePick.settings')
 django.setup()
-
-from core.models import CPU, GPU
 
 load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), '..', '.env'))
 
@@ -68,6 +67,27 @@ Based on this data, generate a JSON array where each object contains:
 - "memory_bandwidth": memory_bandwidth_gbps (in GB/s)
 - "ray_tracing": "Yes" if ray_tracing_support is True, otherwise "No"
 - "performance_score": core_count × core_clock_ghz × memory_bandwidth_gbps (rounded to 2 decimal places)
+
+Sort by performance_score in descending order.
+
+Return ONLY clean JSON, without comments, explanations, or Markdown.
+"""
+ram_prompt = """
+You are an assistant that generates structured JSON data for bar chart visualization based on RAM characteristics.
+
+I provide you with a list of RAM modules with the following fields:
+- name
+- size_gb
+- speed_mhz
+- type
+
+Based on this data, generate a JSON array where each object contains:
+
+- "name": RAM name
+- "size": size_gb (in GB)
+- "speed": speed_mhz (in MHz)
+- "type": RAM type (e.g., DDR4, DDR5)
+- "performance_score": size_gb × speed_mhz (rounded to 2 decimal places)
 
 Sort by performance_score in descending order.
 
@@ -189,4 +209,55 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
 
     except CPU.DoesNotExist as e:
         print(f"CPU not found: {e}")
+        return None
+
+
+def get_ram_comparison_json(ram1_name: str, ram2_name: str):
+    try:
+        ram1 = RAM.objects.get(name=ram1_name)
+        ram2 = RAM.objects.get(name=ram2_name)
+
+        data = [
+            {
+                "name": ram1.name,
+                "size": ram1.size_gb,
+                "speed": ram1.speed_mhz,
+                "type": ram1.type,
+                "performance_score": round(ram1.size_gb * ram1.speed_mhz, 2)
+            },
+            {
+                "name": ram2.name,
+                "size": ram2.size_gb,
+                "speed": ram2.speed_mhz,
+                "type": ram2.type,
+                "performance_score": round(ram2.size_gb * ram2.speed_mhz, 2)
+            }
+        ]
+
+        response = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "deepseek/deepseek-chat-v3-0324:free",
+                "messages": [
+                    {"role": "user", "content": ram_prompt + "\n\nDATA:\n" + str(data)}
+                ],
+                "temperature": 0.1
+            }
+        )
+
+        if response.status_code == 200:
+            result = response.json()
+            content = result['choices'][0]['message']['content']
+            cleaned = clean_json_response(content)
+            return json.loads(cleaned)
+        else:
+            print("API Error:", response.status_code, response.text)
+            return None
+
+    except RAM.DoesNotExist as e:
+        print(f"RAM not found: {e}")
         return None

@@ -1,5 +1,6 @@
 from django.db import models
 
+
 class CPU(models.Model):
     name = models.CharField(max_length=255)
     clock_speed_ghz = models.FloatField()
@@ -15,6 +16,7 @@ class CPU(models.Model):
     def __str__(self):
         return self.name
 
+
 class GPU(models.Model):
     name = models.CharField(max_length=255)
     vram_gb = models.FloatField()
@@ -26,4 +28,14 @@ class GPU(models.Model):
     release_year = models.IntegerField()
 
     def __str__(self):
-            return self.name
+        return self.name
+
+
+class RAM(models.Model):
+    name = models.CharField(max_length=255)
+    size_gb = models.IntegerField()
+    speed_mhz = models.IntegerField()
+    type = models.CharField(max_length=50)
+
+    def __str__(self):
+        return self.name
