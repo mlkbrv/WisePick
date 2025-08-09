@@ -1,6 +1,10 @@
 from rest_framework import serializers
-from .models import CPU, GPU, RAM
+from .models import CPU, GPU, RAM, Needs
 
+class NeedsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Needs
+        fields = '__all__'
 
 class CPUSerializer(serializers.ModelSerializer):
     class Meta:

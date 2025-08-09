@@ -4,7 +4,7 @@ import sys
 import django
 import requests
 from dotenv import load_dotenv
-from core.models import CPU, GPU, RAM
+from core.models import CPU, GPU, RAM, Needs
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'WisePick.settings')
@@ -260,4 +260,155 @@ def get_ram_comparison_json(ram1_name: str, ram2_name: str):
 
     except RAM.DoesNotExist as e:
         print(f"RAM not found: {e}")
+        return None
+
+
+def get_pc_comparison_json(pc1_components: dict, pc2_components: dict, need_description: str = None):
+    try:
+        cpu1 = CPU.objects.get(name=pc1_components.get('cpu_name'))
+        gpu1 = GPU.objects.get(name=pc1_components.get('gpu_name'))
+        ram1 = RAM.objects.get(name=pc1_components.get('ram_name'))
+        
+        # Получаем компоненты для второго PC
+        cpu2 = CPU.objects.get(name=pc2_components.get('cpu_name'))
+        gpu2 = GPU.objects.get(name=pc2_components.get('gpu_name'))
+        ram2 = RAM.objects.get(name=pc2_components.get('ram_name'))
+
+        pc1_data = {
+            "name": f"PC1 ({cpu1.name} + {gpu1.name} + {ram1.name})",
+            "cpu": {
+                "name": cpu1.name,
+                "clock_speed_ghz": float(cpu1.clock_speed_ghz),
+                "core_count": cpu1.core_count,
+                "thread_count": cpu1.thread_count,
+                "tdp_watts": cpu1.tdp_watts,
+                "ipc": float(cpu1.ipc),
+                "performance_score": round(cpu1.core_count * cpu1.clock_speed_ghz * cpu1.ipc, 2)
+            },
+            "gpu": {
+                "name": gpu1.name,
+                "vram_gb": float(gpu1.vram_gb),
+                "core_count": gpu1.core_count,
+                "core_clock_ghz": float(gpu1.core_clock_ghz),
+                "memory_bandwidth_gbps": float(gpu1.memory_bandwidth_gbps),
+                "ray_tracing_support": gpu1.ray_tracing_support,
+                "performance_score": round(gpu1.core_count * gpu1.core_clock_ghz * gpu1.memory_bandwidth_gbps, 2)
+            },
+            "ram": {
+                "name": ram1.name,
+                "size_gb": ram1.size_gb,
+                "speed_mhz": ram1.speed_mhz,
+                "type": ram1.type,
+                "performance_score": round(ram1.size_gb * ram1.speed_mhz, 2)
+            }
+        }
+        
+        pc2_data = {
+            "name": f"PC2 ({cpu2.name} + {gpu2.name} + {ram2.name})",
+            "cpu": {
+                "name": cpu2.name,
+                "clock_speed_ghz": float(cpu2.clock_speed_ghz),
+                "core_count": cpu2.core_count,
+                "thread_count": cpu2.thread_count,
+                "tdp_watts": cpu2.tdp_watts,
+                "ipc": float(cpu2.ipc),
+                "performance_score": round(cpu2.core_count * cpu2.clock_speed_ghz * cpu2.ipc, 2)
+            },
+            "gpu": {
+                "name": gpu2.name,
+                "vram_gb": float(gpu2.vram_gb),
+                "core_count": gpu2.core_count,
+                "core_clock_ghz": float(gpu2.core_clock_ghz),
+                "memory_bandwidth_gbps": float(gpu2.memory_bandwidth_gbps),
+                "ray_tracing_support": gpu2.ray_tracing_support,
+                "performance_score": round(gpu2.core_count * gpu2.core_clock_ghz * gpu2.memory_bandwidth_gbps, 2)
+            },
+            "ram": {
+                "name": ram2.name,
+                "size_gb": ram2.size_gb,
+                "speed_mhz": ram2.speed_mhz,
+                "type": ram2.type,
+                "performance_score": round(ram2.size_gb * ram2.speed_mhz, 2)
+            }
+        }
+
+        comparison_prompt = f"""
+You are an assistant that compares two PC configurations based on user needs and generates structured JSON data.
+
+I provide you with two PC configurations and a user need description. Each PC has CPU, GPU, and RAM components with their specifications.
+
+User Need: {need_description or "General purpose computing"}
+
+PC Configurations:
+PC1: {pc1_data['name']}
+- CPU: {pc1_data['cpu']['name']} ({pc1_data['cpu']['core_count']}c/{pc1_data['cpu']['thread_count']}t, {pc1_data['cpu']['clock_speed_ghz']}GHz)
+- GPU: {pc1_data['gpu']['name']} ({pc1_data['gpu']['vram_gb']}GB VRAM)
+- RAM: {pc1_data['ram']['name']} ({pc1_data['ram']['size_gb']}GB {pc1_data['ram']['type']}, {pc1_data['ram']['speed_mhz']}MHz)
+
+PC2: {pc2_data['name']}
+- CPU: {pc2_data['cpu']['name']} ({pc2_data['cpu']['core_count']}c/{pc2_data['cpu']['thread_count']}t, {pc2_data['cpu']['clock_speed_ghz']}GHz)
+- GPU: {pc2_data['gpu']['name']} ({pc2_data['gpu']['vram_gb']}GB VRAM)
+- RAM: {pc2_data['ram']['name']} ({pc2_data['ram']['size_gb']}GB {pc2_data['ram']['type']}, {pc2_data['ram']['speed_mhz']}MHz)
+
+Based on the user need and component specifications, generate a JSON object with the following structure:
+
+{{
+    "comparison": [
+        {{
+            "pc_name": "PC1",
+            "overall_score": <score from 0-100>,
+            "cpu_score": <score from 0-100>,
+            "gpu_score": <score from 0-100>,
+            "ram_score": <score from 0-100>,
+            "recommendation": "<brief recommendation based on need>",
+            "strengths": ["<strength1>", "<strength2>", "<strength3>"],
+            "weaknesses": ["<weakness1>", "<weakness2>"]
+        }},
+        {{
+            "pc_name": "PC2",
+            "overall_score": <score from 0-100>,
+            "cpu_score": <score from 0-100>,
+            "gpu_score": <score from 0-100>,
+            "ram_score": <score from 0-100>,
+            "recommendation": "<brief recommendation based on need>",
+            "strengths": ["<strength1>", "<strength2>", "<strength3>"],
+            "weaknesses": ["<weakness1>", "<weakness2>"]
+        }}
+    ],
+    "winner": "<PC1 or PC2>",
+    "reasoning": "<detailed explanation of why this PC is better for the given need>"
+}}
+
+Return ONLY clean JSON, without comments, explanations, or Markdown.
+"""
+        
+        response = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "deepseek/deepseek-chat-v3-0324:free",
+                "messages": [
+                    {"role": "user", "content": comparison_prompt}
+                ],
+                "temperature": 0.1
+            }
+        )
+        
+        if response.status_code == 200:
+            result = response.json()
+            content = result['choices'][0]['message']['content']
+            cleaned = clean_json_response(content)
+            return json.loads(cleaned)
+        else:
+            print("API Error:", response.status_code, response.text)
+            return None
+            
+    except (CPU.DoesNotExist, GPU.DoesNotExist, RAM.DoesNotExist) as e:
+        print(f"Component not found: {e}")
+        return None
+    except Exception as e:
+        print(f"Error comparing PCs: {e}")
         return None
