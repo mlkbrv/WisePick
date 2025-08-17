@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  web:
+    build: .
+    ports:
+      - "8000:8000"
+    volumes:
+      - .:/code
+      - sqlite_data:/code/db
+    env_file:
+      - .env
+    environment:
+      - DEBUG=True
+      - DJANGO_SETTINGS_MODULE=WisePick.settings
+      - SECRET_KEY=your-secret-key-here-change-in-production
+      - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+    command: python manage.py runserver 0.0.0.0:8000
+
+volumes:
+  sqlite_data:
