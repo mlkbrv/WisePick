@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WisePick - Laptop Catalog</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .laptops-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .laptop-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .laptop-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+        }
+        
+        .laptop-title {
+            font-size: 1.8rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .specs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .spec-item {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .spec-label {
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .spec-value {
+            color: #333;
+            font-size: 1rem;
+        }
+        
+        .compare-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease;
+        }
+        
+        .compare-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .compare-btn:active {
+            transform: scale(0.98);
+        }
+        
+        .needs-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        
+        .needs-title {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .needs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .need-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .need-item:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-5px);
+        }
+        
+        .need-item.selected {
+            background: #667eea;
+            color: white;
+            border-color: #764ba2;
+        }
+        
+        .need-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .need-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .compare-all-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 30px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+            transition: transform 0.2s ease;
+        }
+        
+        .compare-all-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .compare-all-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>WisePick</h1>
+            <p>Smart Laptop Comparison Tool</p>
+        </div>
+        
+        <div class="laptops-grid">
+            <div class="laptop-card">
+                <div class="laptop-title">Gaming Beast Pro</div>
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <div class="spec-label">CPU</div>
+                        <div class="spec-value">AMD Ryzen 9 3950X</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">GPU</div>
+                        <div class="spec-value">AMD Radeon RX 7900 XTX</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">RAM</div>
+                        <div class="spec-value">Kingston Fury Renegade DDR5 64GB</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Storage</div>
+                        <div class="spec-value">2TB NVMe SSD</div>
+                    </div>
+                </div>
+                <button class="compare-btn" onclick="selectLaptop(1)">Select This Laptop</button>
+            </div>
+            
+            <div class="laptop-card">
+                <div class="laptop-title">Creative Workstation Elite</div>
+                <div class="specs-grid">
+                    <div class="spec-item">
+                        <div class="spec-label">CPU</div>
+                        <div class="spec-value">Intel Core i9-11900K</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">GPU</div>
+                        <div class="spec-value">NVIDIA GeForce RTX 4060</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">RAM</div>
+                        <div class="spec-value">G.Skill Trident Z5 RGB 64GB DDR5</div>
+                    </div>
+                    <div class="spec-item">
+                        <div class="spec-label">Storage</div>
+                        <div class="spec-value">1TB NVMe SSD</div>
+                    </div>
+                </div>
+                <button class="compare-btn" onclick="selectLaptop(2)">Select This Laptop</button>
+            </div>
+        </div>
+        
+        <div class="needs-section">
+            <div class="needs-title">What will you use your laptop for?</div>
+            <div class="needs-grid">
+                <div class="need-item" onclick="selectNeed('3D Rendering')">
+                    <div class="need-name">3D Rendering</div>
+                    <div class="need-description">Professional 3D modeling and rendering</div>
+                </div>
+                <div class="need-item" onclick="selectNeed('General Work')">
+                    <div class="need-name">General Work</div>
+                    <div class="need-description">Office work, browsing, basic tasks</div>
+                </div>
+                <div class="need-item" onclick="selectNeed('Video Editing')">
+                    <div class="need-name">Video Editing</div>
+                    <div class="need-description">Professional video editing and post-production</div>
+                </div>
+                <div class="need-item" onclick="selectNeed('Gaming')">
+                    <div class="need-name">Gaming</div>
+                    <div class="need-description">High-performance gaming and streaming</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="compare-all-btn" id="compareAllBtn" onclick="compareLaptops()" disabled>
+            Compare Laptops
+        </button>
+    </div>
+
+    <script>
+        let selectedLaptops = [];
+        let selectedNeed = '';
+        
+        function selectLaptop(laptopId) {
+            const index = selectedLaptops.indexOf(laptopId);
+            if (index > -1) {
+                selectedLaptops.splice(index, 1);
+            } else if (selectedLaptops.length < 2) {
+                selectedLaptops.push(laptopId);
+            }
+            
+            updateCompareButton();
+            updateLaptopSelection();
+        }
+        
+        function selectNeed(need) {
+            selectedNeed = need;
+            updateNeedSelection();
+            updateCompareButton();
+        }
+        
+        function updateLaptopSelection() {
+            const buttons = document.querySelectorAll('.compare-btn');
+            buttons.forEach((btn, index) => {
+                const laptopId = index + 1;
+                if (selectedLaptops.includes(laptopId)) {
+                    btn.style.background = 'linear-gradient(45deg, #28a745, #20c997)';
+                    btn.textContent = 'Selected ✓';
+                } else {
+                    btn.style.background = 'linear-gradient(45deg, #667eea, #764ba2)';
+                    btn.textContent = 'Select This Laptop';
+                }
+            });
+        }
+        
+        function updateNeedSelection() {
+            const needItems = document.querySelectorAll('.need-item');
+            needItems.forEach(item => {
+                item.classList.remove('selected');
+                if (item.querySelector('.need-name').textContent === selectedNeed) {
+                    item.classList.add('selected');
+                }
+            });
+        }
+        
+        function updateCompareButton() {
+            const compareBtn = document.getElementById('compareAllBtn');
+            if (selectedLaptops.length === 2 && selectedNeed) {
+                compareBtn.disabled = false;
+            } else {
+                compareBtn.disabled = true;
+            }
+        }
+        
+        function compareLaptops() {
+            if (selectedLaptops.length !== 2 || !selectedNeed) {
+                alert('Please select exactly 2 laptops and a use case');
+                return;
+            }
+            
+            // Store selections in localStorage for the comparison page
+            localStorage.setItem('selectedLaptops', JSON.stringify(selectedLaptops));
+            localStorage.setItem('selectedNeed', selectedNeed);
+            
+            // Navigate to comparison page
+            window.location.href = 'compare.html';
+        }
+    </script>
+</body>
+</html>

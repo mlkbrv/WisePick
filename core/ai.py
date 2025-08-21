@@ -112,6 +112,20 @@ def get_gpu_comparison_json(gpu1_name: str, gpu2_name: str):
         gpu1 = GPU.objects.get(name=gpu1_name)
         gpu2 = GPU.objects.get(name=gpu2_name)
 
+
+        gpu1_score = gpu1.core_count * gpu1.core_clock_ghz * gpu1.memory_bandwidth_gbps
+        gpu2_score = gpu2.core_count * gpu2.core_clock_ghz * gpu2.memory_bandwidth_gbps
+        
+        if gpu1_score > gpu2_score:
+            winner = gpu1.name
+            reasoning = f"{gpu1.name} wins with higher performance score ({gpu1_score:.2f} vs {gpu2_score:.2f})"
+        elif gpu2_score > gpu1_score:
+            winner = gpu2.name
+            reasoning = f"{gpu2.name} wins with higher performance score ({gpu2_score:.2f} vs {gpu1_score:.2f})"
+        else:
+            winner = "Tie"
+            reasoning = "Both GPUs have similar performance scores"
+
         data = [
             {
                 "name": gpu1.name,
@@ -147,12 +161,31 @@ def get_gpu_comparison_json(gpu1_name: str, gpu2_name: str):
         )
         if response.status_code == 200:
             result = response.json()
-            content = result['choices'][0]['message']['content']
-            cleaned = clean_json_response(content)
-            return json.loads(cleaned)
+            print(f"GPU API Response: {result}")  # Debug log
+            
+            # Check if response has the expected structure
+            if 'choices' in result and len(result['choices']) > 0:
+                content = result['choices'][0]['message']['content']
+                cleaned = clean_json_response(content)
+                return json.loads(cleaned)
+            elif 'error' in result:
+                print(f"API returned error: {result['error']}")
+                return None
+            else:
+                print(f"Unexpected API response format: {result}")
+                # Return fallback comparison data
+                return {
+                    "winner": winner,
+                    "reasoning": reasoning,
+                    "comparison": data
+                }
         else:
             print("API Error:", response.status_code, response.text)
-            return None
+            return {
+                "winner": winner,
+                "reasoning": reasoning,
+                "comparison": data
+            }
 
     except GPU.DoesNotExist as e:
         print(f"GPU not found: {e}")
@@ -163,6 +196,19 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
     try:
         cpu1 = CPU.objects.get(name=cpu1_name)
         cpu2 = CPU.objects.get(name=cpu2_name)
+
+        cpu1_score = cpu1.core_count * cpu1.clock_speed_ghz * cpu1.ipc
+        cpu2_score = cpu2.core_count * cpu2.clock_speed_ghz * cpu2.ipc
+        
+        if cpu1_score > cpu2_score:
+            winner = cpu1.name
+            reasoning = f"{cpu1.name} wins with higher performance score ({cpu1_score:.2f} vs {cpu2_score:.2f})"
+        elif cpu2_score > cpu1_score:
+            winner = cpu2.name
+            reasoning = f"{cpu2.name} wins with higher performance score ({cpu2_score:.2f} vs {cpu1_score:.2f})"
+        else:
+            winner = "Tie"
+            reasoning = "Both CPUs have similar performance scores"
 
         data = [
             {
@@ -200,12 +246,33 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
 
         if response.status_code == 200:
             result = response.json()
-            content = result['choices'][0]['message']['content']
-            cleaned = clean_json_response(content)
-            return json.loads(cleaned)
+            print(f"CPU API Response: {result}")  # Debug log
+            
+            if 'choices' in result and len(result['choices']) > 0:
+                content = result['choices'][0]['message']['content']
+                cleaned = clean_json_response(content)
+                return json.loads(cleaned)
+            elif 'error' in result:
+                print(f"API returned error: {result['error']}")
+                return {
+                    "winner": winner,
+                    "reasoning": reasoning,
+                    "comparison": data
+                }
+            else:
+                print(f"Unexpected API response format: {result}")
+                return {
+                    "winner": winner,
+                    "reasoning": reasoning,
+                    "comparison": data
+                }
         else:
             print("API Error:", response.status_code, response.text)
-            return None
+            return {
+                "winner": winner,
+                "reasoning": reasoning,
+                "comparison": data
+            }
 
     except CPU.DoesNotExist as e:
         print(f"CPU not found: {e}")
@@ -216,6 +283,19 @@ def get_ram_comparison_json(ram1_name: str, ram2_name: str):
     try:
         ram1 = RAM.objects.get(name=ram1_name)
         ram2 = RAM.objects.get(name=ram2_name)
+
+        ram1_score = ram1.size_gb * ram1.speed_mhz
+        ram2_score = ram2.size_gb * ram2.speed_mhz
+        
+        if ram1_score > ram2_score:
+            winner = ram1.name
+            reasoning = f"{ram1.name} wins with higher performance score ({ram1_score:.2f} vs {ram2_score:.2f})"
+        elif ram2_score > ram1_score:
+            winner = ram2.name
+            reasoning = f"{ram2.name} wins with higher performance score ({ram2_score:.2f} vs {ram1_score:.2f})"
+        else:
+            winner = "Tie"
+            reasoning = "Both RAM modules have similar performance scores"
 
         data = [
             {
@@ -251,12 +331,33 @@ def get_ram_comparison_json(ram1_name: str, ram2_name: str):
 
         if response.status_code == 200:
             result = response.json()
-            content = result['choices'][0]['message']['content']
-            cleaned = clean_json_response(content)
-            return json.loads(cleaned)
+            print(f"RAM API Response: {result}")  # Debug log
+            
+            if 'choices' in result and len(result['choices']) > 0:
+                content = result['choices'][0]['message']['content']
+                cleaned = clean_json_response(content)
+                return json.loads(cleaned)
+            elif 'error' in result:
+                print(f"API returned error: {result['error']}")
+                return {
+                    "winner": winner,
+                    "reasoning": reasoning,
+                    "comparison": data
+                }
+            else:
+                print(f"Unexpected API response format: {result}")
+                return {
+                    "winner": winner,
+                    "reasoning": reasoning,
+                    "comparison": data
+                }
         else:
             print("API Error:", response.status_code, response.text)
-            return None
+            return {
+                "winner": winner,
+                "reasoning": reasoning,
+                "comparison": data
+            }
 
     except RAM.DoesNotExist as e:
         print(f"RAM not found: {e}")
@@ -269,7 +370,6 @@ def get_pc_comparison_json(pc1_components: dict, pc2_components: dict, need_desc
         gpu1 = GPU.objects.get(name=pc1_components.get('gpu_name'))
         ram1 = RAM.objects.get(name=pc1_components.get('ram_name'))
         
-        # Получаем компоненты для второго PC
         cpu2 = CPU.objects.get(name=pc2_components.get('cpu_name'))
         gpu2 = GPU.objects.get(name=pc2_components.get('gpu_name'))
         ram2 = RAM.objects.get(name=pc2_components.get('ram_name'))

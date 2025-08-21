@@ -1,0 +1,810 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WisePick - Laptop Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .comparison-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .comparison-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .laptop-info {
+            padding: 20px;
+            border-radius: 15px;
+            background: #f8f9fa;
+        }
+        
+        .laptop-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 15px;
+        }
+        
+        .laptop-specs {
+            text-align: left;
+        }
+        
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .spec-label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .spec-value {
+            color: #333;
+        }
+        
+        .use-case {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        
+        .comparison-results {
+            margin-top: 30px;
+        }
+        
+        .result-section {
+            margin-bottom: 30px;
+        }
+        
+        .result-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .result-content {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #f5c6cb;
+            margin: 20px 0;
+        }
+        
+        .winner {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .tie {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        /* Chart Styles */
+        .comparison-charts {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .chart-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 2px solid #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .chart-header h4 {
+            font-size: 1.3rem;
+            color: #333;
+            margin: 0;
+            font-weight: bold;
+        }
+        
+        .score {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 15px;
+            transition: width 1s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .specs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .spec-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .spec-label {
+            display: block;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .spec-value {
+            color: #333;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .winner-badge {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .winner-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Laptop Comparison Results</h1>
+        </div>
+        
+        <button class="back-btn" onclick="goBack()">← Back to Catalog</button>
+        
+        <div class="comparison-container">
+            <div class="comparison-header" id="comparisonHeader">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            
+            <div class="use-case" id="useCase">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            
+            <div class="comparison-results">
+                <div class="result-section">
+                    <div class="result-title">CPU Comparison</div>
+                    <div class="result-content" id="cpuComparison">
+                        <div class="loading">Loading CPU comparison...</div>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <div class="result-title">GPU Comparison</div>
+                    <div class="result-content" id="gpuComparison">
+                        <div class="loading">Loading GPU comparison...</div>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <div class="result-title">RAM Comparison</div>
+                    <div class="result-content" id="ramComparison">
+                        <div class="loading">Loading RAM comparison...</div>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <div class="result-title">Overall Performance for Your Use Case</div>
+                    <div class="result-content" id="overallComparison">
+                        <div class="loading">Loading overall comparison...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Laptop data
+        const laptops = {
+            1: {
+                name: "Gaming Beast Pro",
+                cpu: "AMD Ryzen 9 3950X",
+                gpu: "AMD Radeon RX 7900 XTX",
+                ram: "Kingston Fury Renegade DDR5 64GB"
+            },
+            2: {
+                name: "Creative Workstation Elite",
+                cpu: "Intel Core i9-11900K",
+                gpu: "NVIDIA GeForce RTX 4060",
+                ram: "G.Skill Trident Z5 RGB 64GB DDR5"
+            }
+        };
+        
+        // Backend API base URL
+        const API_BASE = 'http://localhost:8000/core';
+        
+        // Get selections from localStorage
+        const selectedLaptops = JSON.parse(localStorage.getItem('selectedLaptops') || '[]');
+        const selectedNeed = localStorage.getItem('selectedNeed') || '';
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (selectedLaptops.length !== 2 || !selectedNeed) {
+                alert('Invalid selection. Please go back and select 2 laptops and a use case.');
+                return;
+            }
+            
+            displayComparisonHeader();
+            displayUseCase();
+            performComparisons();
+        });
+        
+        function displayComparisonHeader() {
+            const header = document.getElementById('comparisonHeader');
+            const laptop1 = laptops[selectedLaptops[0]];
+            const laptop2 = laptops[selectedLaptops[1]];
+            
+            header.innerHTML = `
+                <div class="laptop-info">
+                    <div class="laptop-name">${laptop1.name}</div>
+                    <div class="laptop-specs">
+                        <div class="spec-row">
+                            <span class="spec-label">CPU:</span>
+                            <span class="spec-value">${laptop1.cpu}</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">GPU:</span>
+                            <span class="spec-value">${laptop1.gpu}</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">RAM:</span>
+                            <span class="spec-value">${laptop1.ram}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="laptop-info">
+                    <div class="laptop-name">${laptop2.name}</div>
+                    <div class="laptop-specs">
+                        <div class="spec-row">
+                            <span class="spec-label">CPU:</span>
+                            <span class="spec-value">${laptop2.cpu}</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">GPU:</span>
+                            <span class="spec-value">${laptop2.gpu}</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">RAM:</span>
+                            <span class="spec-value">${laptop2.ram}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function displayUseCase() {
+            document.getElementById('useCase').textContent = `Use Case: ${selectedNeed}`;
+        }
+        
+        async function performComparisons() {
+            const laptop1 = laptops[selectedLaptops[0]];
+            const laptop2 = laptops[selectedLaptops[1]];
+            
+            try {
+                // CPU comparison
+                await compareCPU(laptop1.cpu, laptop2.cpu);
+                
+                // GPU comparison
+                await compareGPU(laptop1.gpu, laptop2.gpu);
+                
+                // RAM comparison
+                await compareRAM(laptop1.ram, laptop2.ram);
+                
+                // Overall comparison
+                await compareOverall(laptop1, laptop2, selectedNeed);
+                
+            } catch (error) {
+                console.error('Error during comparisons:', error);
+                showError('An error occurred during comparison. Please try again.');
+            }
+        }
+        
+        async function compareCPU(cpu1, cpu2) {
+            try {
+                const response = await fetch(`${API_BASE}/compare_cpu/${encodeURIComponent(cpu1)}/${encodeURIComponent(cpu2)}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayCPUComparison(data);
+                } else {
+                    showCPUError(data.error || 'Failed to compare CPUs');
+                }
+            } catch (error) {
+                showCPUError('Network error while comparing CPUs');
+            }
+        }
+        
+        async function compareGPU(gpu1, gpu2) {
+            try {
+                const response = await fetch(`${API_BASE}/compare_gpu/${encodeURIComponent(gpu1)}/${encodeURIComponent(gpu2)}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayGPUComparison(data);
+                } else {
+                    showGPUError(data.error || 'Failed to compare GPUs');
+                }
+            } catch (error) {
+                showGPUError('Network error while comparing GPUs');
+            }
+        }
+        
+        async function compareRAM(ram1, ram2) {
+            try {
+                const response = await fetch(`${API_BASE}/compare_ram/${encodeURIComponent(ram1)}/${encodeURIComponent(ram2)}`);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayRAMComparison(data);
+                } else {
+                    showRAMError(data.error || 'Failed to compare RAM');
+                }
+            } catch (error) {
+                showRAMError('Network error while comparing RAM');
+            }
+        }
+        
+        async function compareOverall(laptop1, laptop2, need) {
+            try {
+                const url = `${API_BASE}/compare_pc/${encodeURIComponent(laptop1.cpu)}/${encodeURIComponent(laptop1.gpu)}/${encodeURIComponent(laptop1.ram)}/${encodeURIComponent(laptop2.cpu)}/${encodeURIComponent(laptop2.gpu)}/${encodeURIComponent(laptop2.ram)}/${encodeURIComponent(need)}`;
+                
+                const response = await fetch(url);
+                const data = await response.json();
+                
+                if (response.ok) {
+                    displayOverallComparison(data);
+                } else {
+                    showOverallError(data.error || 'Failed to compare overall performance');
+                }
+            } catch (error) {
+                showOverallError('Network error while comparing overall performance');
+            }
+        }
+        
+        function displayCPUComparison(data) {
+            const container = document.getElementById('cpuComparison');
+            
+            // Check if data has the expected structure
+            if (Array.isArray(data) && data.length === 2) {
+                const cpu1 = data[0];
+                const cpu2 = data[1];
+                
+                // Find the highest score for scaling
+                const maxScore = Math.max(cpu1.performance_score, cpu2.performance_score);
+                
+                container.innerHTML = `
+                    <div class="comparison-charts">
+                        <div class="chart-item">
+                            <div class="chart-header">
+                                <h4>${cpu1.name}</h4>
+                                <span class="score">${cpu1.performance_score.toFixed(2)}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${(cpu1.performance_score / maxScore * 100)}%"></div>
+                            </div>
+                            <div class="specs-grid">
+                                <div class="spec-item">
+                                    <span class="spec-label">Cores/Threads:</span>
+                                    <span class="spec-value">${cpu1.cores_threads}</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Clock Speed:</span>
+                                    <span class="spec-value">${cpu1.clock_speed} GHz</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">TDP:</span>
+                                    <span class="spec-value">${cpu1.tdp}W</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">L3 Cache:</span>
+                                    <span class="spec-value">${cpu1.l3_cache || 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-item">
+                            <div class="chart-header">
+                                <h4>${cpu2.name}</h4>
+                                <span class="score">${cpu2.performance_score.toFixed(2)}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${(cpu2.performance_score / maxScore * 100)}%"></div>
+                            </div>
+                            <div class="specs-grid">
+                                <div class="spec-item">
+                                    <span class="spec-label">Cores/Threads:</span>
+                                    <span class="spec-value">${cpu2.cores_threads}</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Clock Speed:</span>
+                                    <span class="spec-value">${cpu2.clock_speed} GHz</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">TDP:</span>
+                                    <span class="spec-value">${cpu2.tdp}W</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">L3 Cache:</span>
+                                    <span class="spec-value">${cpu2.l3_cache || 'N/A'}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="winner-badge">
+                        <span class="winner-text">🏆 Winner: ${cpu1.performance_score > cpu2.performance_score ? cpu1.name : cpu2.name}</span>
+                    </div>
+                `;
+            } else {
+                // Fallback for other data formats
+                container.innerHTML = `
+                    <div class="winner">${data.winner || 'Comparison completed'}</div>
+                    <pre style="white-space: pre-wrap; margin-top: 15px;">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            }
+        }
+        
+        function displayGPUComparison(data) {
+            const container = document.getElementById('gpuComparison');
+            
+            // Check if data has the expected structure
+            if (Array.isArray(data) && data.length === 2) {
+                const gpu1 = data[0];
+                const gpu2 = data[1];
+                
+                // Find the highest score for scaling
+                const maxScore = Math.max(gpu1.performance_score, gpu2.performance_score);
+                
+                container.innerHTML = `
+                    <div class="comparison-charts">
+                        <div class="chart-item">
+                            <div class="chart-header">
+                                <h4>${gpu1.name}</h4>
+                                <span class="score">${gpu1.performance_score.toFixed(2)}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${(gpu1.performance_score / maxScore * 100)}%"></div>
+                            </div>
+                            <div class="specs-grid">
+                                <div class="spec-item">
+                                    <span class="spec-label">VRAM:</span>
+                                    <span class="spec-value">${gpu1.vram} GB</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Core Clock:</span>
+                                    <span class="spec-value">${gpu1.core_clock} GHz</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Memory Bandwidth:</span>
+                                    <span class="spec-value">${gpu1.memory_bandwidth} GB/s</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Ray Tracing:</span>
+                                    <span class="spec-value">${gpu1.ray_tracing}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-item">
+                            <div class="chart-header">
+                                <h4>${gpu2.name}</h4>
+                                <span class="score">${gpu2.performance_score.toFixed(2)}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${(gpu2.performance_score / maxScore * 100)}%"></div>
+                            </div>
+                            <div class="specs-grid">
+                                <div class="spec-item">
+                                    <span class="spec-label">VRAM:</span>
+                                    <span class="spec-value">${gpu2.vram} GB</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Core Clock:</span>
+                                    <span class="spec-value">${gpu2.core_clock} GHz</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Memory Bandwidth:</span>
+                                    <span class="spec-value">${gpu2.memory_bandwidth} GB/s</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Ray Tracing:</span>
+                                    <span class="spec-value">${gpu2.ray_tracing}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="winner-badge">
+                        <span class="winner-text">🏆 Winner: ${gpu1.performance_score > gpu2.performance_score ? gpu1.name : gpu2.name}</span>
+                    </div>
+                `;
+            } else {
+                // Fallback for other data formats
+                container.innerHTML = `
+                    <div class="winner">${data.winner || 'Comparison completed'}</div>
+                    <pre style="white-space: pre-wrap; margin-top: 15px;">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            }
+        }
+        
+        function displayRAMComparison(data) {
+            const container = document.getElementById('ramComparison');
+            
+            // Check if data has the expected structure
+            if (Array.isArray(data) && data.length === 2) {
+                const ram1 = data[0];
+                const ram2 = data[1];
+                
+                // Find the highest score for scaling
+                const maxScore = Math.max(ram1.performance_score, ram2.performance_score);
+                
+                container.innerHTML = `
+                    <div class="comparison-charts">
+                        <div class="chart-item">
+                            <div class="chart-header">
+                                <h4>${ram1.name}</h4>
+                                <span class="score">${ram1.performance_score.toFixed(2)}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${(ram1.performance_score / maxScore * 100)}%"></div>
+                            </div>
+                            <div class="specs-grid">
+                                <div class="spec-item">
+                                    <span class="spec-label">Size:</span>
+                                    <span class="spec-value">${ram1.size} GB</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Speed:</span>
+                                    <span class="spec-value">${ram1.speed} MHz</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Type:</span>
+                                    <span class="spec-value">${ram1.type}</span>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="chart-item">
+                            <div class="chart-header">
+                                <h4>${ram2.name}</h4>
+                                <span class="score">${ram2.performance_score.toFixed(2)}</span>
+                            </div>
+                            <div class="progress-bar">
+                                <div class="progress-fill" style="width: ${(ram2.performance_score / maxScore * 100)}%"></div>
+                            </div>
+                            <div class="specs-grid">
+                                <div class="spec-item">
+                                    <span class="spec-label">Size:</span>
+                                    <span class="spec-value">${ram2.size} GB</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Speed:</span>
+                                    <span class="spec-value">${ram2.speed} MHz</span>
+                                </div>
+                                <div class="spec-item">
+                                    <span class="spec-label">Type:</span>
+                                    <span class="spec-value">${ram2.type}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="winner-badge">
+                        <span class="winner-text">🏆 Winner: ${ram1.performance_score > ram2.performance_score ? ram1.name : ram2.name}</span>
+                    </div>
+                `;
+            } else {
+                // Fallback for other data formats
+                container.innerHTML = `
+                    <div class="winner">${data.winner || 'Comparison completed'}</div>
+                    <pre style="white-space: pre-wrap; margin-top: 15px;">${JSON.stringify(data, null, 2)}</pre>
+                `;
+            }
+        }
+        
+        function displayOverallComparison(data) {
+            const container = document.getElementById('overallComparison');
+            container.innerHTML = `
+                <div class="winner">${data.winner || 'Overall comparison completed'}</div>
+                <pre style="white-space: pre-wrap; margin-top: 15px;">${JSON.stringify(data, null, 2)}</pre>
+            `;
+        }
+        
+        function showCPUError(message) {
+            document.getElementById('cpuComparison').innerHTML = `<div class="error">${message}</div>`;
+        }
+        
+        function showGPUError(message) {
+            document.getElementById('gpuComparison').innerHTML = `<div class="error">${message}</div>`;
+        }
+        
+        function showRAMError(message) {
+            document.getElementById('ramComparison').innerHTML = `<div class="error">${message}</div>`;
+        }
+        
+        function showOverallError(message) {
+            document.getElementById('overallComparison').innerHTML = `<div class="error">${message}</div>`;
+        }
+        
+        function showError(message) {
+            // Show error in a more prominent way
+            alert(message);
+        }
+        
+        function goBack() {
+            window.location.href = 'index.html';
+        }
+    </script>
+</body>
+</html>
