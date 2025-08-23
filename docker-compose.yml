@@ -15,7 +15,20 @@ services:
       - DJANGO_SETTINGS_MODULE=WisePick.settings
       - SECRET_KEY=your-secret-key-here-change-in-production
       - ALLOWED_HOSTS=localhost,127.0.0.1,0.0.0.0
+      - REDIS_URL=redis://redis:6379/0
     command: python manage.py runserver 0.0.0.0:8000
+    depends_on:
+      - redis
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    restart: unless-stopped
 
 volumes:
   sqlite_data:
+  redis_data:

@@ -1,6 +1,8 @@
 from rest_framework import generics
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.utils.decorators import method_decorator
+from django.views.decorators.cache import cache_page
 from .ai import *
 from .models import *
 from .serializers import CPUSerializer, GPUSerializer, RAMSerializer, NeedsSerializer
@@ -11,6 +13,9 @@ class CPUListCreateAPIView(generics.ListCreateAPIView):
     queryset = CPU.objects.all()
     serializer_class = CPUSerializer
 
+    @method_decorator(cache_page(15,key_prefix='cpu-list-create-api-view'))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 class CPUDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = CPU.objects.all()
