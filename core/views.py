@@ -7,11 +7,17 @@ from .ai import *
 from .models import *
 from .serializers import CPUSerializer, GPUSerializer, RAMSerializer, NeedsSerializer
 import urllib.parse
-
+from .pagination import *
+from rest_framework import filters
 
 class CPUListCreateAPIView(generics.ListCreateAPIView):
-    queryset = CPU.objects.all()
+    queryset = CPU.objects.order_by('pk')
     serializer_class = CPUSerializer
+
+    pagination_class = CPUPagination
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
 
     @method_decorator(cache_page(15,key_prefix='cpu-list-create-api-view'))
     def list(self, request, *args, **kwargs):
@@ -23,6 +29,8 @@ class CPUDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class CPUCompareAPIView(APIView):
+
+    @method_decorator(cache_page(15,key_prefix='cpu-compare-api-view'))
     def get(self, request, cpu1, cpu2):
         data = get_cpu_comparison_json(cpu1, cpu2)
         if data is None:
@@ -31,8 +39,17 @@ class CPUCompareAPIView(APIView):
 
 
 class GPUListCreateAPIView(generics.ListCreateAPIView):
-    queryset = GPU.objects.all()
+    queryset = GPU.objects.order_by('pk')
     serializer_class = GPUSerializer
+
+    pagination_class = GPUPagination
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+    @method_decorator(cache_page(15,key_prefix='gpu-list-create-api-view'))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class GPUDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -41,6 +58,8 @@ class GPUDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class GPUCompareAPIView(APIView):
+
+    @method_decorator(cache_page(15,key_prefix='gpu-compare-api-view'))
     def get(self, request, gpu1, gpu2):
         data = get_gpu_comparison_json(gpu1, gpu2)
         if data is None:
@@ -49,8 +68,17 @@ class GPUCompareAPIView(APIView):
 
 
 class RAMListCreateAPIView(generics.ListCreateAPIView):
-    queryset = RAM.objects.all()
+    queryset = RAM.objects.order_by('pk')
     serializer_class = RAMSerializer
+
+    pagination_class = RAMPagination
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+    @method_decorator(cache_page(15,key_prefix='ram-list-create-api-view'))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class RAMDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -59,6 +87,7 @@ class RAMDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class RAMCompareAPIView(APIView):
+    @method_decorator(cache_page(15,key_prefix='ram-compare-api-view'))
     def get(self, request, ram1, ram2):
         data = get_ram_comparison_json(ram1, ram2)
         if data is None:
@@ -67,8 +96,17 @@ class RAMCompareAPIView(APIView):
 
 
 class NeedsListCreateAPIView(generics.ListCreateAPIView):
-    queryset = Needs.objects.all()
+    queryset = Needs.objects.order_by('pk')
     serializer_class = NeedsSerializer
+
+    pagination_class = NeedsPagination
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+    @method_decorator(cache_page(15,key_prefix='needs-list-create-api-view'))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
 
 
 class NeedsDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
@@ -77,8 +115,9 @@ class NeedsDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
 
 
 class NeedsCompareAPIView(APIView):
+
+    @method_decorator(cache_page(2*60,key_prefix='needs-compare-api-view'))
     def get(self, request, cpu1, gpu1, ram1, cpu2, gpu2, ram2, need):
-        # Decode URL-encoded parameters
         cpu1 = urllib.parse.unquote(cpu1)
         gpu1 = urllib.parse.unquote(gpu1)
         ram1 = urllib.parse.unquote(ram1)
@@ -86,8 +125,8 @@ class NeedsCompareAPIView(APIView):
         gpu2 = urllib.parse.unquote(gpu2)
         ram2 = urllib.parse.unquote(ram2)
         need = urllib.parse.unquote(need)
-        
-        # Form components for comparison
+
+
         pc1_components = {
             'cpu_name': cpu1,
             'gpu_name': gpu1,
@@ -99,8 +138,7 @@ class NeedsCompareAPIView(APIView):
             'gpu_name': gpu2,
             'ram_name': ram2
         }
-        
-        # Call comparison function
+
         data = get_pc_comparison_json(pc1_components, pc2_components, need)
         if data is None:
             return Response({"error": "Failed to compare PC configurations"}, status=400)

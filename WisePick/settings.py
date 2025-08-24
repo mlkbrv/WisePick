@@ -148,7 +148,6 @@ if not CORS_ALLOW_ALL_ORIGINS:
 else:
     CORS_ALLOWED_ORIGINS = []
 
-# Redis configuration
 REDIS_URL = os.environ.get('REDIS_URL', 'redis://127.0.0.1:6379/0')
 
 CACHES = {
