@@ -1,0 +1,1126 @@
+openapi: 3.0.3
+info:
+  title: WisePick API
+  version: 1.0.0
+  description: Choosing a laptop is no much more easier
+paths:
+  /core/compare_cpu/{cpu1}/{cpu2}:
+    get:
+      operationId: core_compare_cpu_retrieve
+      parameters:
+      - in: path
+        name: cpu1
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: cpu2
+        schema:
+          type: string
+        required: true
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /core/compare_gpu/{gpu1}/{gpu2}:
+    get:
+      operationId: core_compare_gpu_retrieve
+      parameters:
+      - in: path
+        name: gpu1
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: gpu2
+        schema:
+          type: string
+        required: true
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /core/compare_pc/{cpu1}/{gpu1}/{ram1}/{cpu2}/{gpu2}/{ram2}/{need}:
+    get:
+      operationId: core_compare_pc_retrieve
+      parameters:
+      - in: path
+        name: cpu1
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: cpu2
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: gpu1
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: gpu2
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: need
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: ram1
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: ram2
+        schema:
+          type: string
+        required: true
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /core/compare_ram/{ram1}/{ram2}:
+    get:
+      operationId: core_compare_ram_retrieve
+      parameters:
+      - in: path
+        name: ram1
+        schema:
+          type: string
+        required: true
+      - in: path
+        name: ram2
+        schema:
+          type: string
+        required: true
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /core/cpu/:
+    get:
+      operationId: core_cpu_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedCPUList'
+          description: ''
+    post:
+      operationId: core_cpu_create
+      tags:
+      - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CPU'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CPU'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CPU'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CPU'
+          description: ''
+  /core/cpu/{id}:
+    get:
+      operationId: core_cpu_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CPU'
+          description: ''
+    put:
+      operationId: core_cpu_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CPU'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/CPU'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/CPU'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CPU'
+          description: ''
+    patch:
+      operationId: core_cpu_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedCPU'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedCPU'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedCPU'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CPU'
+          description: ''
+    delete:
+      operationId: core_cpu_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /core/gpu/:
+    get:
+      operationId: core_gpu_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedGPUList'
+          description: ''
+    post:
+      operationId: core_gpu_create
+      tags:
+      - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GPU'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GPU'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GPU'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GPU'
+          description: ''
+  /core/gpu/{id}:
+    get:
+      operationId: core_gpu_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GPU'
+          description: ''
+    put:
+      operationId: core_gpu_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/GPU'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/GPU'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/GPU'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GPU'
+          description: ''
+    patch:
+      operationId: core_gpu_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedGPU'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedGPU'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedGPU'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GPU'
+          description: ''
+    delete:
+      operationId: core_gpu_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /core/needs/:
+    get:
+      operationId: core_needs_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedNeedsList'
+          description: ''
+    post:
+      operationId: core_needs_create
+      tags:
+      - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Needs'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Needs'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Needs'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Needs'
+          description: ''
+  /core/needs/{id}:
+    get:
+      operationId: core_needs_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Needs'
+          description: ''
+    put:
+      operationId: core_needs_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Needs'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/Needs'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/Needs'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Needs'
+          description: ''
+    patch:
+      operationId: core_needs_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedNeeds'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedNeeds'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedNeeds'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Needs'
+          description: ''
+    delete:
+      operationId: core_needs_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+  /core/ram/:
+    get:
+      operationId: core_ram_list
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedRAMList'
+          description: ''
+    post:
+      operationId: core_ram_create
+      tags:
+      - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RAM'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RAM'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RAM'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RAM'
+          description: ''
+  /core/ram/{id}:
+    get:
+      operationId: core_ram_retrieve
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RAM'
+          description: ''
+    put:
+      operationId: core_ram_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RAM'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/RAM'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/RAM'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RAM'
+          description: ''
+    patch:
+      operationId: core_ram_partial_update
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedRAM'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedRAM'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedRAM'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RAM'
+          description: ''
+    delete:
+      operationId: core_ram_destroy
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: integer
+        required: true
+      tags:
+      - core
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '204':
+          description: No response body
+components:
+  schemas:
+    CPU:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        clock_speed_ghz:
+          type: number
+          format: double
+        core_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        thread_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        cache_size_l1:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        cache_size_l2:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        cache_size_l3:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tdp_watts:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        architecture_generation:
+          type: string
+          maxLength: 255
+        ipc:
+          type: number
+          format: double
+          description: Instructions per clock
+      required:
+      - architecture_generation
+      - cache_size_l1
+      - cache_size_l2
+      - cache_size_l3
+      - clock_speed_ghz
+      - core_count
+      - id
+      - ipc
+      - name
+      - tdp_watts
+      - thread_count
+    GPU:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        vram_gb:
+          type: number
+          format: double
+        core_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        core_clock_ghz:
+          type: number
+          format: double
+        memory_bandwidth_gbps:
+          type: number
+          format: double
+        architecture:
+          type: string
+          maxLength: 255
+        ray_tracing_support:
+          type: boolean
+        release_year:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+      required:
+      - architecture
+      - core_clock_ghz
+      - core_count
+      - id
+      - memory_bandwidth_gbps
+      - name
+      - release_year
+      - vram_gb
+    Needs:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+      required:
+      - description
+      - id
+      - name
+    PaginatedCPUList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/CPU'
+    PaginatedGPUList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/GPU'
+    PaginatedNeedsList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/Needs'
+    PaginatedRAMList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/RAM'
+    PatchedCPU:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        clock_speed_ghz:
+          type: number
+          format: double
+        core_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        thread_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        cache_size_l1:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        cache_size_l2:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        cache_size_l3:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        tdp_watts:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        architecture_generation:
+          type: string
+          maxLength: 255
+        ipc:
+          type: number
+          format: double
+          description: Instructions per clock
+    PatchedGPU:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        vram_gb:
+          type: number
+          format: double
+        core_count:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        core_clock_ghz:
+          type: number
+          format: double
+        memory_bandwidth_gbps:
+          type: number
+          format: double
+        architecture:
+          type: string
+          maxLength: 255
+        ray_tracing_support:
+          type: boolean
+        release_year:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+    PatchedNeeds:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        description:
+          type: string
+    PatchedRAM:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        size_gb:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        speed_mhz:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        type:
+          type: string
+          maxLength: 50
+    RAM:
+      type: object
+      properties:
+        id:
+          type: integer
+          readOnly: true
+        name:
+          type: string
+          maxLength: 255
+        size_gb:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        speed_mhz:
+          type: integer
+          maximum: 9223372036854775807
+          minimum: -9223372036854775808
+          format: int64
+        type:
+          type: string
+          maxLength: 50
+      required:
+      - id
+      - name
+      - size_gb
+      - speed_mhz
+      - type
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid
