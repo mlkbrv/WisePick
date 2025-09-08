@@ -3,7 +3,8 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 from django.utils.decorators import method_decorator
 from django.views.decorators.cache import cache_page
-from .ai import *
+from .compare import *
+from .ai import get_pc_comparison_json
 from .models import *
 from .serializers import CPUSerializer, GPUSerializer, RAMSerializer, NeedsSerializer
 import urllib.parse

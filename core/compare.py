@@ -1,11 +1,5 @@
 from django.db.models import Max, Min, Avg
 from django.core.exceptions import ObjectDoesNotExist
-import json
-import os
-import sys
-import django
-import requests
-from dotenv import load_dotenv
 from core.models import CPU, GPU, RAM, Needs
 
 WEIGHTS = {
