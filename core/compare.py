@@ -89,3 +89,81 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
         "comparison": comparison
     }
 
+GPU_WEIGHTS = {
+    "core_count":            0.25,
+    "core_clock":            0.20,
+    "memory_bandwidth":      0.25,
+    "vram":                  0.20,
+    "ray_tracing":           0.10,
+}
+
+def _gpu_norm(value, min_v, max_v):
+    if max_v == min_v:
+        return 100.0
+    return 100 * (value - min_v) / (max_v - min_v)
+
+def _gpu_scales():
+    return GPU.objects.aggregate(
+        min_cc=Min("core_count"),           max_cc=Max("core_count"),
+        min_ck=Min("core_clock_ghz"),       max_ck=Max("core_clock_ghz"),
+        min_bw=Min("memory_bandwidth_gbps"),max_bw=Max("memory_bandwidth_gbps"),
+        min_vram=Min("vram_gb"),            max_vram=Max("vram_gb"),
+    )
+
+def _gpu_index(gpu: GPU, scales: dict) -> float:
+    cc  = _gpu_norm(gpu.core_count,       scales["min_cc"],   scales["max_cc"])
+    ck  = _gpu_norm(gpu.core_clock_ghz,   scales["min_ck"],   scales["max_ck"])
+    bw  = _gpu_norm(gpu.memory_bandwidth_gbps, scales["min_bw"], scales["max_bw"])
+    vram= _gpu_norm(gpu.vram_gb,          scales["min_vram"], scales["max_vram"])
+    rt  = 100.0 if gpu.ray_tracing_support else 0.0
+
+    return (cc   * GPU_WEIGHTS["core_count"]       +
+            ck   * GPU_WEIGHTS["core_clock"]       +
+            bw   * GPU_WEIGHTS["memory_bandwidth"] +
+            vram * GPU_WEIGHTS["vram"]             +
+            rt   * GPU_WEIGHTS["ray_tracing"])
+
+def get_gpu_comparison_json(gpu1_name: str, gpu2_name: str):
+    try:
+        gpu1 = GPU.objects.get(name=gpu1_name)
+        gpu2 = GPU.objects.get(name=gpu2_name)
+    except ObjectDoesNotExist:
+        return None
+
+    scales = _gpu_scales()
+    idx1 = _gpu_index(gpu1, scales)
+    idx2 = _gpu_index(gpu2, scales)
+
+    if idx1 > idx2:
+        winner, reasoning = gpu1.name, f"{gpu1.name} wins (index {idx1:.1f} vs {idx2:.1f})"
+    elif idx2 > idx1:
+        winner, reasoning = gpu2.name, f"{gpu2.name} wins (index {idx2:.1f} vs {idx1:.1f})"
+    else:
+        winner, reasoning = "Tie", "Both GPUs show equal performance index"
+
+    comparison = [
+        {
+            "name": gpu1.name,
+            "vram_gb": float(gpu1.vram_gb),
+            "core_count": gpu1.core_count,
+            "core_clock_ghz": float(gpu1.core_clock_ghz),
+            "memory_bandwidth_gbps": float(gpu1.memory_bandwidth_gbps),
+            "ray_tracing_support": gpu1.ray_tracing_support,
+            "performance_index": round(idx1, 2),
+        },
+        {
+            "name": gpu2.name,
+            "vram_gb": float(gpu2.vram_gb),
+            "core_count": gpu2.core_count,
+            "core_clock_ghz": float(gpu2.core_clock_ghz),
+            "memory_bandwidth_gbps": float(gpu2.memory_bandwidth_gbps),
+            "ray_tracing_support": gpu2.ray_tracing_support,
+            "performance_index": round(idx2, 2),
+        }
+    ]
+
+    return {
+        "winner": winner,
+        "reasoning": reasoning,
+        "comparison": comparison
+    }
