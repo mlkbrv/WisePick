@@ -458,20 +458,16 @@ git clone <repository-url>
 cd WisePick
 
 # Create .env file
-cp .env.example .env
+cp env.example .env
 # Edit .env with your settings
 
-# Start the application
+# Start the application (migrations and data population happen automatically)
 docker-compose up -d
-
-# Run migrations
-docker-compose exec web python manage.py migrate
-
-# Create superuser (optional)
-docker-compose exec web python manage.py createsuperuser
 
 # Access the application
 # http://localhost:8000
+# Admin panel: http://localhost:8000/admin/ (admin/admin123)
+# API: http://localhost:8000/api/
 ```
 
 #### Manual Docker Build
@@ -647,17 +643,17 @@ python manage.py runserver
 
 #### Development with Docker
 ```bash
-# Start development environment
+# Start development environment (migrations and data population happen automatically)
 docker-compose up -d
-
-# Run migrations
-docker-compose exec web python manage.py migrate
 
 # Access Django shell
 docker-compose exec web python manage.py shell
 
 # View logs
 docker-compose logs -f web
+
+# Rebuild if you made changes
+docker-compose up --build -d
 ```
 
 ### 🧪 Testing

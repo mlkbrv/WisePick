@@ -34,5 +34,10 @@ USER appuser
 # Открываем порт для Django
 EXPOSE 8000
 
+# Создаем скрипт инициализации
+COPY docker-entrypoint.sh /docker-entrypoint.sh
+RUN chmod +x /docker-entrypoint.sh
+
 # Команда для запуска Django
+ENTRYPOINT ["/docker-entrypoint.sh"]
 CMD ["python", "manage.py", "runserver", "0.0.0.0:8000"]
