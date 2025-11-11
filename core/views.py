@@ -6,7 +6,7 @@ from django.views.decorators.cache import cache_page
 from .compare import *
 from .ai import get_pc_comparison_json
 from .models import *
-from .serializers import CPUSerializer, GPUSerializer, RAMSerializer, NeedsSerializer
+from .serializers import CPUSerializer, GPUSerializer, RAMSerializer, NeedsSerializer, PhoneSerializer
 import urllib.parse
 from .pagination import *
 from rest_framework import filters
@@ -143,4 +143,33 @@ class NeedsCompareAPIView(APIView):
         data = get_pc_comparison_json(pc1_components, pc2_components, need)
         if data is None:
             return Response({"error": "Failed to compare PC configurations"}, status=400)
+        return Response(data)
+
+
+class PhoneListCreateAPIView(generics.ListCreateAPIView):
+    queryset = Phone.objects.order_by('pk')
+    serializer_class = PhoneSerializer
+
+    pagination_class = PhonePagination
+
+    filter_backends = (filters.SearchFilter,)
+    search_fields = ('name',)
+
+    @method_decorator(cache_page(15,key_prefix='phone-list-create-api-view'))
+    def list(self, request, *args, **kwargs):
+        return super().list(request, *args, **kwargs)
+
+
+class PhoneDetailAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Phone.objects.all()
+    serializer_class = PhoneSerializer
+
+
+class PhoneCompareAPIView(APIView):
+
+    @method_decorator(cache_page(15,key_prefix='phone-compare-api-view'))
+    def get(self, request, phone1, phone2):
+        data = get_phone_comparison_json(phone1, phone2)
+        if data is None:
+            return Response({"error": "Failed to compare video cards"}, status=400)
         return Response(data)

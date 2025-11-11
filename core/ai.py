@@ -4,7 +4,7 @@ import sys
 import django
 import requests
 from dotenv import load_dotenv
-from core.models import CPU, GPU, RAM, Needs
+from core.models import CPU, GPU, RAM, Needs, Phone, BrandsCoefficients
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'WisePick.settings')
@@ -94,7 +94,6 @@ Sort by performance_score in descending order.
 Return ONLY clean JSON, without comments, explanations, or Markdown.
 """
 
-
 # =====Tools=====
 def clean_json_response(text):
     text = text.strip()
@@ -112,10 +111,9 @@ def get_gpu_comparison_json(gpu1_name: str, gpu2_name: str):
         gpu1 = GPU.objects.get(name=gpu1_name)
         gpu2 = GPU.objects.get(name=gpu2_name)
 
-
         gpu1_score = gpu1.core_count * gpu1.core_clock_ghz * gpu1.memory_bandwidth_gbps
         gpu2_score = gpu2.core_count * gpu2.core_clock_ghz * gpu2.memory_bandwidth_gbps
-        
+
         if gpu1_score > gpu2_score:
             winner = gpu1.name
             reasoning = f"{gpu1.name} wins with higher performance score ({gpu1_score:.2f} vs {gpu2_score:.2f})"
@@ -161,9 +159,8 @@ def get_gpu_comparison_json(gpu1_name: str, gpu2_name: str):
         )
         if response.status_code == 200:
             result = response.json()
-            print(f"GPU API Response: {result}")  # Debug log
-            
-            # Check if response has the expected structure
+            print(f"GPU API Response: {result}")
+
             if 'choices' in result and len(result['choices']) > 0:
                 content = result['choices'][0]['message']['content']
                 cleaned = clean_json_response(content)
@@ -173,7 +170,6 @@ def get_gpu_comparison_json(gpu1_name: str, gpu2_name: str):
                 return None
             else:
                 print(f"Unexpected API response format: {result}")
-                # Return fallback comparison data
                 return {
                     "winner": winner,
                     "reasoning": reasoning,
@@ -199,7 +195,7 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
 
         cpu1_score = cpu1.core_count * cpu1.clock_speed_ghz * cpu1.ipc
         cpu2_score = cpu2.core_count * cpu2.clock_speed_ghz * cpu2.ipc
-        
+
         if cpu1_score > cpu2_score:
             winner = cpu1.name
             reasoning = f"{cpu1.name} wins with higher performance score ({cpu1_score:.2f} vs {cpu2_score:.2f})"
@@ -247,7 +243,7 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
         if response.status_code == 200:
             result = response.json()
             print(f"CPU API Response: {result}")  # Debug log
-            
+
             if 'choices' in result and len(result['choices']) > 0:
                 content = result['choices'][0]['message']['content']
                 cleaned = clean_json_response(content)
@@ -286,7 +282,7 @@ def get_ram_comparison_json(ram1_name: str, ram2_name: str):
 
         ram1_score = ram1.size_gb * ram1.speed_mhz
         ram2_score = ram2.size_gb * ram2.speed_mhz
-        
+
         if ram1_score > ram2_score:
             winner = ram1.name
             reasoning = f"{ram1.name} wins with higher performance score ({ram1_score:.2f} vs {ram2_score:.2f})"
@@ -332,7 +328,7 @@ def get_ram_comparison_json(ram1_name: str, ram2_name: str):
         if response.status_code == 200:
             result = response.json()
             print(f"RAM API Response: {result}")  # Debug log
-            
+
             if 'choices' in result and len(result['choices']) > 0:
                 content = result['choices'][0]['message']['content']
                 cleaned = clean_json_response(content)
@@ -369,7 +365,7 @@ def get_pc_comparison_json(pc1_components: dict, pc2_components: dict, need_desc
         cpu1 = CPU.objects.get(name=pc1_components.get('cpu_name'))
         gpu1 = GPU.objects.get(name=pc1_components.get('gpu_name'))
         ram1 = RAM.objects.get(name=pc1_components.get('ram_name'))
-        
+
         cpu2 = CPU.objects.get(name=pc2_components.get('cpu_name'))
         gpu2 = GPU.objects.get(name=pc2_components.get('gpu_name'))
         ram2 = RAM.objects.get(name=pc2_components.get('ram_name'))
@@ -402,7 +398,7 @@ def get_pc_comparison_json(pc1_components: dict, pc2_components: dict, need_desc
                 "performance_score": round(ram1.size_gb * ram1.speed_mhz, 2)
             }
         }
-        
+
         pc2_data = {
             "name": f"PC2 ({cpu2.name} + {gpu2.name} + {ram2.name})",
             "cpu": {
@@ -481,7 +477,7 @@ Based on the user need and component specifications, generate a JSON object with
 
 Return ONLY clean JSON, without comments, explanations, or Markdown.
 """
-        
+
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
             headers={
@@ -496,7 +492,7 @@ Return ONLY clean JSON, without comments, explanations, or Markdown.
                 "temperature": 0.1
             }
         )
-        
+
         if response.status_code == 200:
             result = response.json()
             content = result['choices'][0]['message']['content']
@@ -505,10 +501,120 @@ Return ONLY clean JSON, without comments, explanations, or Markdown.
         else:
             print("API Error:", response.status_code, response.text)
             return None
-            
+
     except (CPU.DoesNotExist, GPU.DoesNotExist, RAM.DoesNotExist) as e:
         print(f"Component not found: {e}")
         return None
     except Exception as e:
         print(f"Error comparing PCs: {e}")
+        return None
+
+
+def get_phone_comparison_json(phone1_name: str, phone2_name: str, need_description: str = None):
+    try:
+        phone1 = Phone.objects.get(name=phone1_name)
+        phone2 = Phone.objects.get(name=phone2_name)
+
+        brand_coeffs = dict(BrandsCoefficients.objects.values_list('name', 'coefficient'))
+
+        phone1_data = {
+            "name": phone1.name,
+            "brand": phone1.brand,
+            "ram_size": phone1.ram_size,
+            "memory_size": phone1.memory_size,
+            "processor": phone1.processor,
+            "camera_mp": phone1.camera_mp,
+            "battery": phone1.battery,
+            "year": phone1.year,
+            "brand_coefficient": brand_coeffs.get(phone1.brand, 1.0)
+        }
+
+        phone2_data = {
+            "name": phone2.name,
+            "brand": phone2.brand,
+            "ram_size": phone2.ram_size,
+            "memory_size": phone2.memory_size,
+            "processor": phone2.processor,
+            "camera_mp": phone2.camera_mp,
+            "battery": phone2.battery,
+            "year": phone2.year,
+            "brand_coefficient": brand_coeffs.get(phone2.brand, 1.0)
+        }
+
+        comparison_prompt = f"""
+You are an assistant that compares two smartphones based on user needs and component specifications.
+
+User Need: {need_description or "General purpose smartphone usage"}
+
+Each phone has brand-based coefficients that influence its overall performance, reliability, and optimization quality.
+
+Phone 1:
+{phone1_data}
+
+Phone 2:
+{phone2_data}
+
+Brand Coefficients:
+{brand_coeffs}
+
+Generate a JSON object with the following structure:
+{{
+    "comparison": [
+        {{
+            "phone_name": "Phone1",
+            "overall_score": <score from 0-100>,
+            "performance_score": <score from 0-100>,
+            "camera_score": <score from 0-100>,
+            "battery_score": <score from 0-100>,
+            "recommendation": "<brief recommendation based on user need>",
+            "strengths": ["<strength1>", "<strength2>", "<strength3>"],
+            "weaknesses": ["<weakness1>", "<weakness2>"]
+        }},
+        {{
+            "phone_name": "Phone2",
+            "overall_score": <score from 0-100>,
+            "performance_score": <score from 0-100>,
+            "camera_score": <score from 0-100>,
+            "battery_score": <score from 0-100>,
+            "recommendation": "<brief recommendation based on user need>",
+            "strengths": ["<strength1>", "<strength2>", "<strength3>"],
+            "weaknesses": ["<weakness1>", "<weakness2>"]
+        }}
+    ],
+    "winner": "<Phone1 or Phone2>",
+    "reasoning": "<detailed explanation of which phone better fits the described need>"
+}}
+
+Return ONLY pure JSON (no markdown or text).
+"""
+
+        response = requests.post(
+            url="https://openrouter.ai/api/v1/chat/completions",
+            headers={
+                "Authorization": f"Bearer {api_key}",
+                "Content-Type": "application/json"
+            },
+            json={
+                "model": "deepseek/deepseek-chat-v3-0324:free",
+                "messages": [
+                    {"role": "user", "content": comparison_prompt}
+                ],
+                "temperature": 0.1
+            }
+        )
+
+        if response.status_code == 200:
+            result = response.json()
+            content = result['choices'][0]['message']['content']
+            cleaned = clean_json_response(content)
+            return json.loads(cleaned)
+        else:
+            print("API Error:", response.status_code, response.text)
+            return None
+
+    except Phone.DoesNotExist as e:
+        print(f"Phone not found: {e}")
+        return None
+    except Exception as e:
+        print(f"Error comparing phones: {e}")
         return None

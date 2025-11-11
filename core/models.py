@@ -47,3 +47,27 @@ class Needs(models.Model):
 
     def __str__(self):
         return self.name
+
+class Phone(models.Model):
+    name = models.CharField(max_length=255,blank=False,null=False)
+    brand = models.CharField(max_length=255,blank=False,null=False)
+    image = models.ImageField(upload_to='phones_images/',blank=False,null=False)
+    ram_size = models.IntegerField(blank=True,null=True)
+    memory_size = models.IntegerField(blank=True,null=True)
+    processor = models.CharField(max_length=255,blank=True,null=True)
+    os_type = models.CharField(max_length=255,blank=True,null=True)
+    graphic_processor = models.CharField(max_length=255,blank=True,null=True)
+    camera_mp = models.CharField(max_length=255,blank=True,null=True)
+    screen_type = models.CharField(max_length=255,blank=True,null=True)
+    battery = models.IntegerField(blank=True,null=True)
+    year = models.IntegerField(blank=True,null=True)
+
+    def __str__(self):
+        return self.name
+
+class BrandsCoefficients(models.Model):
+    name = models.CharField(max_length=255,blank=False,null=False)
+    coefficient = models.FloatField()
+
+    def __str__(self):
+        return f"{self.name}+{self.coefficient}"

@@ -2,6 +2,9 @@ from django.urls import path, include
 from . import views
 
 urlpatterns = [
+    path("phone/", views.PhoneListCreateAPIView.as_view(), name="phone-list-create"),
+    path("phone/<int:pk>", views.PhoneDetailAPIView.as_view(), name="phone-detail"),
+    path("compare_phone/<str:phone1>/<str:phone2>", views.PhoneCompareAPIView.as_view(), name="phone-compare-list-create"),
     path("cpu/", views.CPUListCreateAPIView.as_view(), name="cpu-list-create"),
     path("cpu/<int:pk>", views.CPUDetailAPIView.as_view(), name="cpu-detail"),
     path("compare_cpu/<str:cpu1>/<str:cpu2>", views.CPUCompareAPIView.as_view(), name="cpu-compare-list-create"),
@@ -13,5 +16,6 @@ urlpatterns = [
     path("compare_ram/<str:ram1>/<str:ram2>", views.RAMCompareAPIView.as_view(), name="ram-compare-list-create"),
     path("needs/", views.NeedsListCreateAPIView.as_view(), name="needs-list-create"),
     path("needs/<int:pk>", views.NeedsDetailAPIView.as_view(), name="needs-detail"),
-    path("compare_pc/<str:cpu1>/<str:gpu1>/<str:ram1>/<str:cpu2>/<str:gpu2>/<str:ram2>/<str:need>", views.NeedsCompareAPIView.as_view(), name="needs-compare"),
+    path("compare_pc/<str:cpu1>/<str:gpu1>/<str:ram1>/<str:cpu2>/<str:gpu2>/<str:ram2>/<str:need>",
+         views.NeedsCompareAPIView.as_view(), name="needs-compare"),
 ]

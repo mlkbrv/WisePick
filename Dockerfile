@@ -10,6 +10,7 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
 RUN apt-get update && apt-get install -y \
     gcc \
     g++ \
+    redis-tools \
     && rm -rf /var/lib/apt/lists/*
 
 # Создаем рабочую директорию
@@ -35,8 +36,7 @@ USER appuser
 EXPOSE 8000
 
 # Создаем скрипт инициализации
-COPY docker-entrypoint.sh /docker-entrypoint.sh
-RUN chmod +x /docker-entrypoint.sh
+COPY --chmod=755 docker-entrypoint.sh /docker-entrypoint.sh
 
 # Команда для запуска Django
 ENTRYPOINT ["/docker-entrypoint.sh"]

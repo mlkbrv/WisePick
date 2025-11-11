@@ -11,3 +11,6 @@ class RAMPagination(PageNumberPagination):
 
 class NeedsPagination(PageNumberPagination):
     page_size = 5
+
+class PhonePagination(PageNumberPagination):
+    page_size = 30
