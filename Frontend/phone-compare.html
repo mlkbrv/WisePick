@@ -1,0 +1,720 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WisePick - Phone Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .back-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: 2px solid white;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+        }
+        
+        .back-btn:hover {
+            background: white;
+            color: #667eea;
+        }
+        
+        .comparison-container {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+        
+        .comparison-header {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        
+        .phone-info {
+            padding: 20px;
+            border-radius: 15px;
+            background: #f8f9fa;
+        }
+        
+        .phone-image {
+            width: 100%;
+            max-width: 200px;
+            height: 200px;
+            object-fit: contain;
+            margin: 0 auto 15px;
+            display: block;
+            border-radius: 10px;
+            background: white;
+        }
+        
+        .phone-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        
+        .phone-brand {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        
+        .phone-specs {
+            text-align: left;
+        }
+        
+        .spec-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            padding: 5px 0;
+            border-bottom: 1px solid #eee;
+        }
+        
+        .spec-label {
+            font-weight: bold;
+            color: #555;
+        }
+        
+        .spec-value {
+            color: #333;
+        }
+        
+        .use-case {
+            background: #667eea;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            text-align: center;
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        
+        .comparison-results {
+            margin-top: 30px;
+        }
+        
+        .result-section {
+            margin-bottom: 30px;
+        }
+        
+        .result-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        .result-content {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #f5c6cb;
+            margin: 20px 0;
+        }
+        
+        .winner {
+            background: #d4edda;
+            color: #155724;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        .tie {
+            background: #fff3cd;
+            color: #856404;
+            padding: 10px 15px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-weight: bold;
+            text-align: center;
+        }
+        
+        /* Chart Styles */
+        .comparison-charts {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+        
+        .chart-item {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border: 2px solid #f8f9fa;
+            transition: all 0.3s ease;
+        }
+        
+        .chart-item:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            border-color: #667eea;
+        }
+        
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #f0f0f0;
+        }
+        
+        .chart-header h4 {
+            font-size: 1.3rem;
+            color: #333;
+            margin: 0;
+            font-weight: bold;
+        }
+        
+        .score {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            padding: 8px 15px;
+            border-radius: 20px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            min-width: 80px;
+            text-align: center;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 25px;
+            background: #f0f0f0;
+            border-radius: 15px;
+            overflow: hidden;
+            margin-bottom: 20px;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            border-radius: 15px;
+            transition: width 1s ease-in-out;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+        
+        @keyframes shimmer {
+            0% { left: -100%; }
+            100% { left: 100%; }
+        }
+        
+        .specs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+        }
+        
+        .spec-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .spec-label {
+            display: block;
+            font-weight: bold;
+            color: #555;
+            font-size: 0.9rem;
+            margin-bottom: 5px;
+        }
+        
+        .spec-value {
+            color: #333;
+            font-size: 1rem;
+            font-weight: 500;
+        }
+        
+        .winner-badge {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            padding: 15px;
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+            box-shadow: 0 5px 15px rgba(40, 167, 69, 0.3);
+        }
+        
+        .winner-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+        }
+        
+        .strengths-weaknesses {
+            margin-top: 20px;
+        }
+        
+        .strengths, .weaknesses {
+            margin-top: 15px;
+        }
+        
+        .strengths h5, .weaknesses h5 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #333;
+        }
+        
+        .strengths h5 {
+            color: #28a745;
+        }
+        
+        .weaknesses h5 {
+            color: #dc3545;
+        }
+        
+        .strengths ul, .weaknesses ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        
+        .strengths li {
+            background: #d4edda;
+            color: #155724;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            border-left: 3px solid #28a745;
+        }
+        
+        .weaknesses li {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 8px 12px;
+            margin-bottom: 5px;
+            border-radius: 5px;
+            border-left: 3px solid #dc3545;
+        }
+        
+        .reasoning {
+            background: #e7f3ff;
+            color: #004085;
+            padding: 20px;
+            border-radius: 15px;
+            border-left: 4px solid #0066cc;
+            margin-top: 20px;
+            line-height: 1.6;
+        }
+        
+        .reasoning h4 {
+            margin-bottom: 10px;
+            color: #004085;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Phone Comparison Results</h1>
+        </div>
+        
+        <button class="back-btn" onclick="goBack()">← Back to Catalog</button>
+        
+        <div class="comparison-container">
+            <div class="comparison-header" id="comparisonHeader">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            
+            <div class="use-case" id="useCase">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            
+            <div class="comparison-results">
+                <div class="result-section">
+                    <div class="result-title">Overall Comparison</div>
+                    <div class="result-content" id="overallComparison">
+                        <div class="loading">Loading overall comparison...</div>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <div class="result-title">Performance Score</div>
+                    <div class="result-content" id="performanceComparison">
+                        <div class="loading">Loading performance comparison...</div>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <div class="result-title">Camera Score</div>
+                    <div class="result-content" id="cameraComparison">
+                        <div class="loading">Loading camera comparison...</div>
+                    </div>
+                </div>
+                
+                <div class="result-section">
+                    <div class="result-title">Battery Score</div>
+                    <div class="result-content" id="batteryComparison">
+                        <div class="loading">Loading battery comparison...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Backend API base URL
+        const API_BASE = 'http://localhost:8000/core';
+        
+        // Get selections from localStorage
+        const selectedPhones = JSON.parse(localStorage.getItem('selectedPhones') || '[]');
+        const selectedNeed = localStorage.getItem('selectedPhoneNeed') || '';
+        
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            if (selectedPhones.length !== 2 || !selectedNeed) {
+                alert('Invalid selection. Please go back and select 2 phones and a use case.');
+                return;
+            }
+            
+            displayComparisonHeader();
+            displayUseCase();
+            performComparison();
+        });
+        
+        function displayComparisonHeader() {
+            const header = document.getElementById('comparisonHeader');
+            const phone1 = selectedPhones[0];
+            const phone2 = selectedPhones[1];
+            
+            const image1Url = phone1.image ? (phone1.image.startsWith('http') ? phone1.image : `http://localhost:8000${phone1.image}`) : '';
+            const image2Url = phone2.image ? (phone2.image.startsWith('http') ? phone2.image : `http://localhost:8000${phone2.image}`) : '';
+            
+            header.innerHTML = `
+                <div class="phone-info">
+                    ${image1Url ? `<img src="${image1Url}" alt="${phone1.name}" class="phone-image" onerror="this.style.display='none'">` : ''}
+                    <div class="phone-name">${phone1.name}</div>
+                    <div class="phone-brand">${phone1.brand}</div>
+                    <div class="phone-specs">
+                        <div class="spec-row">
+                            <span class="spec-label">RAM:</span>
+                            <span class="spec-value">${phone1.ram_size || 'N/A'} GB</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Storage:</span>
+                            <span class="spec-value">${phone1.memory_size || 'N/A'} GB</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Processor:</span>
+                            <span class="spec-value">${phone1.processor || 'N/A'}</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Camera:</span>
+                            <span class="spec-value">${phone1.camera_mp || 'N/A'} MP</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Battery:</span>
+                            <span class="spec-value">${phone1.battery || 'N/A'} mAh</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Year:</span>
+                            <span class="spec-value">${phone1.year || 'N/A'}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="phone-info">
+                    ${image2Url ? `<img src="${image2Url}" alt="${phone2.name}" class="phone-image" onerror="this.style.display='none'">` : ''}
+                    <div class="phone-name">${phone2.name}</div>
+                    <div class="phone-brand">${phone2.brand}</div>
+                    <div class="phone-specs">
+                        <div class="spec-row">
+                            <span class="spec-label">RAM:</span>
+                            <span class="spec-value">${phone2.ram_size || 'N/A'} GB</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Storage:</span>
+                            <span class="spec-value">${phone2.memory_size || 'N/A'} GB</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Processor:</span>
+                            <span class="spec-value">${phone2.processor || 'N/A'}</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Camera:</span>
+                            <span class="spec-value">${phone2.camera_mp || 'N/A'} MP</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Battery:</span>
+                            <span class="spec-value">${phone2.battery || 'N/A'} mAh</span>
+                        </div>
+                        <div class="spec-row">
+                            <span class="spec-label">Year:</span>
+                            <span class="spec-value">${phone2.year || 'N/A'}</span>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+        
+        function displayUseCase() {
+            document.getElementById('useCase').textContent = `Use Case: ${selectedNeed}`;
+        }
+        
+        async function performComparison() {
+            const phone1 = selectedPhones[0];
+            const phone2 = selectedPhones[1];
+            
+            try {
+                // Compare phones
+                const phone1Name = encodeURIComponent(phone1.name);
+                const phone2Name = encodeURIComponent(phone2.name);
+                const response = await fetch(`${API_BASE}/compare_phone/${phone1Name}/${phone2Name}`);
+                const data = await response.json();
+                
+                if (response.ok && data) {
+                    displayComparisonResults(data);
+                } else {
+                    showError('Failed to compare phones. ' + (data.error || 'Unknown error'));
+                }
+            } catch (error) {
+                console.error('Error during comparison:', error);
+                showError('An error occurred during comparison. Please try again.');
+            }
+        }
+        
+        function displayComparisonResults(data) {
+            if (!data.comparison || !Array.isArray(data.comparison) || data.comparison.length !== 2) {
+                showError('Invalid comparison data received');
+                return;
+            }
+            
+            const phone1Data = data.comparison[0];
+            const phone2Data = data.comparison[1];
+            
+            // Overall comparison
+            displayOverallComparison(phone1Data, phone2Data, data.winner, data.reasoning);
+            
+            // Performance comparison
+            displayScoreComparison('performanceComparison', 'Performance', phone1Data, phone2Data, 'performance_score');
+            
+            // Camera comparison
+            displayScoreComparison('cameraComparison', 'Camera', phone1Data, phone2Data, 'camera_score');
+            
+            // Battery comparison
+            displayScoreComparison('batteryComparison', 'Battery', phone1Data, phone2Data, 'battery_score');
+        }
+        
+        function displayOverallComparison(phone1Data, phone2Data, winner, reasoning) {
+            const container = document.getElementById('overallComparison');
+            const maxScore = Math.max(phone1Data.overall_score || 0, phone2Data.overall_score || 0);
+            
+            container.innerHTML = `
+                <div class="comparison-charts">
+                    <div class="chart-item">
+                        <div class="chart-header">
+                            <h4>${phone1Data.phone_name}</h4>
+                            <span class="score">${(phone1Data.overall_score || 0).toFixed(1)}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${maxScore > 0 ? (phone1Data.overall_score / maxScore * 100) : 0}%"></div>
+                        </div>
+                        <div class="strengths-weaknesses">
+                            ${phone1Data.strengths && phone1Data.strengths.length > 0 ? `
+                                <div class="strengths">
+                                    <h5>✓ Strengths</h5>
+                                    <ul>
+                                        ${phone1Data.strengths.map(s => `<li>${s}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            ${phone1Data.weaknesses && phone1Data.weaknesses.length > 0 ? `
+                                <div class="weaknesses">
+                                    <h5>✗ Weaknesses</h5>
+                                    <ul>
+                                        ${phone1Data.weaknesses.map(w => `<li>${w}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            ${phone1Data.recommendation ? `
+                                <div style="margin-top: 15px; padding: 10px; background: #e7f3ff; border-radius: 8px; color: #004085;">
+                                    <strong>Recommendation:</strong> ${phone1Data.recommendation}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                    
+                    <div class="chart-item">
+                        <div class="chart-header">
+                            <h4>${phone2Data.phone_name}</h4>
+                            <span class="score">${(phone2Data.overall_score || 0).toFixed(1)}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${maxScore > 0 ? (phone2Data.overall_score / maxScore * 100) : 0}%"></div>
+                        </div>
+                        <div class="strengths-weaknesses">
+                            ${phone2Data.strengths && phone2Data.strengths.length > 0 ? `
+                                <div class="strengths">
+                                    <h5>✓ Strengths</h5>
+                                    <ul>
+                                        ${phone2Data.strengths.map(s => `<li>${s}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            ${phone2Data.weaknesses && phone2Data.weaknesses.length > 0 ? `
+                                <div class="weaknesses">
+                                    <h5>✗ Weaknesses</h5>
+                                    <ul>
+                                        ${phone2Data.weaknesses.map(w => `<li>${w}</li>`).join('')}
+                                    </ul>
+                                </div>
+                            ` : ''}
+                            ${phone2Data.recommendation ? `
+                                <div style="margin-top: 15px; padding: 10px; background: #e7f3ff; border-radius: 8px; color: #004085;">
+                                    <strong>Recommendation:</strong> ${phone2Data.recommendation}
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="winner-badge">
+                    <span class="winner-text">🏆 Winner: ${winner || 'Comparison completed'}</span>
+                </div>
+                
+                ${reasoning ? `
+                    <div class="reasoning">
+                        <h4>Why this choice?</h4>
+                        <p>${reasoning}</p>
+                    </div>
+                ` : ''}
+            `;
+        }
+        
+        function displayScoreComparison(containerId, title, phone1Data, phone2Data, scoreKey) {
+            const container = document.getElementById(containerId);
+            const score1 = phone1Data[scoreKey] || 0;
+            const score2 = phone2Data[scoreKey] || 0;
+            const maxScore = Math.max(score1, score2, 100);
+            
+            container.innerHTML = `
+                <div class="comparison-charts">
+                    <div class="chart-item">
+                        <div class="chart-header">
+                            <h4>${phone1Data.phone_name}</h4>
+                            <span class="score">${score1.toFixed(1)}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${maxScore > 0 ? (score1 / maxScore * 100) : 0}%"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="chart-item">
+                        <div class="chart-header">
+                            <h4>${phone2Data.phone_name}</h4>
+                            <span class="score">${score2.toFixed(1)}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: ${maxScore > 0 ? (score2 / maxScore * 100) : 0}%"></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="winner-badge">
+                    <span class="winner-text">🏆 Winner: ${score1 > score2 ? phone1Data.phone_name : score2 > score1 ? phone2Data.phone_name : 'Tie'}</span>
+                </div>
+            `;
+        }
+        
+        function showError(message) {
+            const containers = ['overallComparison', 'performanceComparison', 'cameraComparison', 'batteryComparison'];
+            containers.forEach(id => {
+                document.getElementById(id).innerHTML = `<div class="error">${message}</div>`;
+            });
+        }
+        
+        function goBack() {
+            window.location.href = 'phone-index.html';
+        }
+    </script>
+</body>
+</html>
+

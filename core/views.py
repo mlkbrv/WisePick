@@ -169,7 +169,17 @@ class PhoneCompareAPIView(APIView):
 
     @method_decorator(cache_page(15,key_prefix='phone-compare-api-view'))
     def get(self, request, phone1, phone2):
+        phone1 = urllib.parse.unquote(phone1)
+        phone2 = urllib.parse.unquote(phone2)
         data = get_phone_comparison_json(phone1, phone2)
         if data is None:
-            return Response({"error": "Failed to compare video cards"}, status=400)
+            return Response({"error": "Failed to compare phones. Phone not found or database error."}, status=400)
+        if isinstance(data, dict) and data.get("error") and data.get("api_error"):
+            # API error (rate limit, etc.)
+            status_code = data.get("status_code", 429)
+            return Response({
+                "error": data.get("message", "API error occurred"),
+                "details": data.get("details", ""),
+                "error_code": data.get("error_code")
+            }, status=status_code)
         return Response(data)

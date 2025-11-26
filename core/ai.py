@@ -17,6 +17,22 @@ api_key = os.getenv("OPENROUTER_API_KEY")
 if not api_key:
     raise ValueError("OPENROUTER_API_KEY not found")
 
+# =====API HELPER FUNCTIONS=====
+def get_openrouter_headers():
+    """Get headers for OpenRouter API requests"""
+    headers = {
+        "Authorization": f"Bearer {api_key}",
+        "Content-Type": "application/json"
+    }
+    # Optional headers for rankings on openrouter.ai
+    site_url = os.getenv("OPENROUTER_SITE_URL", "")
+    site_name = os.getenv("OPENROUTER_SITE_NAME", "WisePick")
+    if site_url:
+        headers["HTTP-Referer"] = site_url
+    if site_name:
+        headers["X-Title"] = site_name
+    return headers
+
 # =====Promts=========
 cpu_prompt = """
 You are an assistant that generates structured JSON data for bar chart visualization based on processor characteristics.
@@ -145,17 +161,14 @@ def get_gpu_comparison_json(gpu1_name: str, gpu2_name: str):
 
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "deepseek/deepseek-chat-v3-0324:free",
+            headers=get_openrouter_headers(),
+            data=json.dumps({
+                "model": "google/gemma-3n-e2b-it:free",
                 "messages": [
                     {"role": "user", "content": gpu_prompt + "\n\nDATA:\n" + str(data)}
                 ],
                 "temperature": 0.1
-            }
+            })
         )
         if response.status_code == 200:
             result = response.json()
@@ -227,17 +240,14 @@ def get_cpu_comparison_json(cpu1_name: str, cpu2_name: str):
 
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "deepseek/deepseek-chat-v3-0324:free",
+            headers=get_openrouter_headers(),
+            data=json.dumps({
+                "model": "google/gemma-3n-e2b-it:free",
                 "messages": [
                     {"role": "user", "content": cpu_prompt + "\n\nDATA:\n" + str(data)}
                 ],
                 "temperature": 0.1
-            }
+            })
         )
 
         if response.status_code == 200:
@@ -312,17 +322,14 @@ def get_ram_comparison_json(ram1_name: str, ram2_name: str):
 
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "deepseek/deepseek-chat-v3-0324:free",
+            headers=get_openrouter_headers(),
+            data=json.dumps({
+                "model": "google/gemma-3n-e2b-it:free",
                 "messages": [
                     {"role": "user", "content": ram_prompt + "\n\nDATA:\n" + str(data)}
                 ],
                 "temperature": 0.1
-            }
+            })
         )
 
         if response.status_code == 200:
@@ -480,17 +487,14 @@ Return ONLY clean JSON, without comments, explanations, or Markdown.
 
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "deepseek/deepseek-chat-v3-0324:free",
+            headers=get_openrouter_headers(),
+            data=json.dumps({
+                "model": "google/gemma-3n-e2b-it:free",
                 "messages": [
                     {"role": "user", "content": comparison_prompt}
                 ],
                 "temperature": 0.1
-            }
+            })
         )
 
         if response.status_code == 200:
@@ -590,17 +594,14 @@ Return ONLY pure JSON (no markdown or text).
 
         response = requests.post(
             url="https://openrouter.ai/api/v1/chat/completions",
-            headers={
-                "Authorization": f"Bearer {api_key}",
-                "Content-Type": "application/json"
-            },
-            json={
-                "model": "deepseek/deepseek-chat-v3-0324:free",
+            headers=get_openrouter_headers(),
+            data=json.dumps({
+                "model": "google/gemma-3n-e2b-it:free",
                 "messages": [
                     {"role": "user", "content": comparison_prompt}
                 ],
                 "temperature": 0.1
-            }
+            })
         )
 
         if response.status_code == 200:
@@ -609,12 +610,28 @@ Return ONLY pure JSON (no markdown or text).
             cleaned = clean_json_response(content)
             return json.loads(cleaned)
         else:
-            print("API Error:", response.status_code, response.text)
-            return None
+            error_data = response.json() if response.text else {}
+            error_msg = error_data.get('error', {}).get('message', 'Unknown API error')
+            error_code = error_data.get('error', {}).get('code', response.status_code)
+            
+            print(f"API Error {response.status_code}: {error_msg}")
+            print(f"Full response: {response.text}")
+            
+            # Return error info instead of None for better error handling
+            return {
+                "error": True,
+                "api_error": True,
+                "status_code": response.status_code,
+                "error_code": error_code,
+                "message": error_msg,
+                "details": "OpenRouter API error. Please check your API key or try again later."
+            }
 
     except Phone.DoesNotExist as e:
         print(f"Phone not found: {e}")
         return None
     except Exception as e:
         print(f"Error comparing phones: {e}")
+        import traceback
+        traceback.print_exc()
         return None

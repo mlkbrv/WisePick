@@ -1,0 +1,472 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WisePick - Phone Comparison</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+        }
+        
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .phones-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .phone-card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .phone-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 30px 60px rgba(0,0,0,0.15);
+        }
+        
+        .phone-card.selected {
+            border: 3px solid #28a745;
+            background: linear-gradient(135deg, #f0fff4 0%, #e6ffe6 100%);
+        }
+        
+        .phone-image {
+            width: 100%;
+            height: 200px;
+            object-fit: contain;
+            margin-bottom: 20px;
+            border-radius: 10px;
+            background: #f8f9fa;
+        }
+        
+        .phone-title {
+            font-size: 1.5rem;
+            color: #333;
+            margin-bottom: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .phone-brand {
+            font-size: 1rem;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .specs-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .spec-item {
+            background: #f8f9fa;
+            padding: 12px;
+            border-radius: 10px;
+            border-left: 4px solid #667eea;
+        }
+        
+        .spec-label {
+            font-weight: bold;
+            color: #555;
+            font-size: 0.85rem;
+            margin-bottom: 5px;
+        }
+        
+        .spec-value {
+            color: #333;
+            font-size: 0.95rem;
+        }
+        
+        .compare-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: transform 0.2s ease;
+        }
+        
+        .compare-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .compare-btn.selected {
+            background: linear-gradient(45deg, #28a745, #20c997);
+        }
+        
+        .needs-section {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            margin-bottom: 40px;
+        }
+        
+        .needs-title {
+            font-size: 2rem;
+            color: #333;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .needs-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 20px;
+        }
+        
+        .need-item {
+            background: #f8f9fa;
+            padding: 20px;
+            border-radius: 15px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+        
+        .need-item:hover {
+            background: #667eea;
+            color: white;
+            transform: translateY(-5px);
+        }
+        
+        .need-item.selected {
+            background: #667eea;
+            color: white;
+            border-color: #764ba2;
+        }
+        
+        .need-name {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        
+        .need-description {
+            font-size: 0.9rem;
+            opacity: 0.8;
+        }
+        
+        .compare-all-btn {
+            background: linear-gradient(45deg, #28a745, #20c997);
+            color: white;
+            border: none;
+            padding: 20px 40px;
+            border-radius: 30px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            cursor: pointer;
+            display: block;
+            margin: 0 auto;
+            transition: transform 0.2s ease;
+        }
+        
+        .compare-all-btn:hover {
+            transform: scale(1.05);
+        }
+        
+        .compare-all-btn:disabled {
+            background: #6c757d;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: white;
+            font-size: 1.2rem;
+        }
+        
+        .loading::after {
+            content: '';
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255,255,255,0.3);
+            border-top: 3px solid white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-left: 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 10px;
+            border: 1px solid #f5c6cb;
+            margin: 20px 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>WisePick</h1>
+            <p>Smart Phone Comparison Tool</p>
+        </div>
+        
+        <div id="phonesContainer">
+            <div class="loading">Loading phones...</div>
+        </div>
+        
+        <div class="needs-section">
+            <div class="needs-title">What will you use your phone for?</div>
+            <div class="needs-grid">
+                <div class="need-item" onclick="selectNeed('Gaming')">
+                    <div class="need-name">Gaming</div>
+                    <div class="need-description">High-performance mobile gaming</div>
+                </div>
+                <div class="need-item" onclick="selectNeed('Photography')">
+                    <div class="need-name">Photography</div>
+                    <div class="need-description">Professional photography and video</div>
+                </div>
+                <div class="need-item" onclick="selectNeed('Work & Productivity')">
+                    <div class="need-name">Work & Productivity</div>
+                    <div class="need-description">Business tasks and productivity apps</div>
+                </div>
+                <div class="need-item" onclick="selectNeed('General Use')">
+                    <div class="need-name">General Use</div>
+                    <div class="need-description">Daily tasks, social media, browsing</div>
+                </div>
+                <div class="need-item" onclick="selectNeed('Battery Life')">
+                    <div class="need-name">Battery Life</div>
+                    <div class="need-description">Long-lasting battery performance</div>
+                </div>
+            </div>
+        </div>
+        
+        <button class="compare-all-btn" id="compareAllBtn" onclick="comparePhones()" disabled>
+            Compare Phones
+        </button>
+    </div>
+
+    <script>
+        const API_BASE = 'http://localhost:8000/core';
+        let phones = [];
+        let selectedPhones = [];
+        let selectedNeed = '';
+        
+        // Load phones from API
+        async function loadPhones() {
+            try {
+                const response = await fetch(`${API_BASE}/phone/`);
+                const data = await response.json();
+                
+                if (data.results) {
+                    phones = data.results;
+                    displayPhones(phones);
+                } else if (Array.isArray(data)) {
+                    phones = data;
+                    displayPhones(phones);
+                } else {
+                    showError('Failed to load phones. Invalid response format.');
+                }
+            } catch (error) {
+                console.error('Error loading phones:', error);
+                showError('Failed to load phones. Please check if the server is running.');
+            }
+        }
+        
+        function displayPhones(phonesList) {
+            const container = document.getElementById('phonesContainer');
+            
+            if (phonesList.length === 0) {
+                container.innerHTML = '<div class="error">No phones found in the database.</div>';
+                return;
+            }
+            
+            container.innerHTML = '<div class="phones-grid"></div>';
+            const grid = container.querySelector('.phones-grid');
+            
+            phonesList.forEach((phone, index) => {
+                const phoneCard = document.createElement('div');
+                phoneCard.className = 'phone-card';
+                phoneCard.onclick = () => selectPhone(phone.id || index);
+                
+                const imageUrl = phone.image ? (phone.image.startsWith('http') ? phone.image : `http://localhost:8000${phone.image}`) : '';
+                
+                phoneCard.innerHTML = `
+                    ${imageUrl ? `<img src="${imageUrl}" alt="${phone.name}" class="phone-image" onerror="this.style.display='none'">` : ''}
+                    <div class="phone-title">${phone.name}</div>
+                    <div class="phone-brand">${phone.brand}</div>
+                    <div class="specs-grid">
+                        <div class="spec-item">
+                            <div class="spec-label">RAM</div>
+                            <div class="spec-value">${phone.ram_size || 'N/A'} GB</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Storage</div>
+                            <div class="spec-value">${phone.memory_size || 'N/A'} GB</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Processor</div>
+                            <div class="spec-value">${phone.processor || 'N/A'}</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Camera</div>
+                            <div class="spec-value">${phone.camera_mp || 'N/A'} MP</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Battery</div>
+                            <div class="spec-value">${phone.battery || 'N/A'} mAh</div>
+                        </div>
+                        <div class="spec-item">
+                            <div class="spec-label">Year</div>
+                            <div class="spec-value">${phone.year || 'N/A'}</div>
+                        </div>
+                    </div>
+                    <button class="compare-btn" onclick="event.stopPropagation(); selectPhone(${phone.id || index})">
+                        Select This Phone
+                    </button>
+                `;
+                
+                grid.appendChild(phoneCard);
+            });
+        }
+        
+        function selectPhone(phoneId) {
+            const phone = phones.find(p => (p.id || phones.indexOf(p)) === phoneId);
+            if (!phone) return;
+            
+            const index = selectedPhones.findIndex(p => (p.id || phones.indexOf(p)) === phoneId);
+            if (index > -1) {
+                selectedPhones.splice(index, 1);
+            } else if (selectedPhones.length < 2) {
+                selectedPhones.push(phone);
+            }
+            
+            updatePhoneSelection();
+            updateCompareButton();
+        }
+        
+        function selectNeed(need) {
+            selectedNeed = need;
+            updateNeedSelection();
+            updateCompareButton();
+        }
+        
+        function updatePhoneSelection() {
+            const cards = document.querySelectorAll('.phone-card');
+            cards.forEach((card, index) => {
+                const phone = phones[index];
+                if (!phone) return;
+                
+                const phoneId = phone.id || index;
+                const isSelected = selectedPhones.some(p => (p.id || phones.indexOf(p)) === phoneId);
+                
+                if (isSelected) {
+                    card.classList.add('selected');
+                    const btn = card.querySelector('.compare-btn');
+                    if (btn) {
+                        btn.textContent = 'Selected ✓';
+                        btn.classList.add('selected');
+                    }
+                } else {
+                    card.classList.remove('selected');
+                    const btn = card.querySelector('.compare-btn');
+                    if (btn) {
+                        btn.textContent = 'Select This Phone';
+                        btn.classList.remove('selected');
+                    }
+                }
+            });
+        }
+        
+        function updateNeedSelection() {
+            const needItems = document.querySelectorAll('.need-item');
+            needItems.forEach(item => {
+                item.classList.remove('selected');
+                if (item.querySelector('.need-name').textContent === selectedNeed) {
+                    item.classList.add('selected');
+                }
+            });
+        }
+        
+        function updateCompareButton() {
+            const compareBtn = document.getElementById('compareAllBtn');
+            if (selectedPhones.length === 2 && selectedNeed) {
+                compareBtn.disabled = false;
+            } else {
+                compareBtn.disabled = true;
+            }
+        }
+        
+        function comparePhones() {
+            if (selectedPhones.length !== 2 || !selectedNeed) {
+                alert('Please select exactly 2 phones and a use case');
+                return;
+            }
+            
+            // Store selections in localStorage for the comparison page
+            localStorage.setItem('selectedPhones', JSON.stringify(selectedPhones));
+            localStorage.setItem('selectedPhoneNeed', selectedNeed);
+            
+            // Navigate to comparison page
+            window.location.href = 'phone-compare.html';
+        }
+        
+        function showError(message) {
+            const container = document.getElementById('phonesContainer');
+            container.innerHTML = `<div class="error">${message}</div>`;
+        }
+        
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPhones();
+        });
+    </script>
+</body>
+</html>
+

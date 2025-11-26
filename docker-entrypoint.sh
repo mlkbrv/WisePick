@@ -32,6 +32,10 @@ python populate_data.py
 echo "Collecting static files..."
 python manage.py collectstatic --noinput
 
+# Создаем папку media, если её нет
+echo "Ensuring media directory exists..."
+mkdir -p /code/media/phones_images
+
 # Запускаем команду, переданную в CMD
 echo "Starting application..."
 exec "$@"
