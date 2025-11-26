@@ -13,49 +13,51 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      # ---------- ENV FILE ----------
+      - name: Create .env file for CI
+        run: |
+          cat <<EOF > .env
+          DEBUG=${{ secrets.DEBUG }}
+          SECRET_KEY=${{ secrets.DJANGO_SECRET_KEY }}
+          DJANGO_SETTINGS_MODULE=WisePick.settings
+
+          REDIS_URL=redis://redis:6379/0
+
+          OPENROUTER_API_KEY=${{ secrets.OPENROUTER_API_KEY }}
+
+          DATABASE_URL=${{ secrets.DATABASE_URL }}
+
+          ALLOWED_HOSTS=${{ secrets.ALLOWED_HOSTS }}
+          CORS_ALLOW_ALL_ORIGINS=${{ secrets.CORS_ALLOW_ALL_ORIGINS }}
+          CORS_ALLOW_CREDENTIALS=${{ secrets.CORS_ALLOW_CREDENTIALS }}
+          EOF
+
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-
-
-      # ----- СБОРКА ПРОЕКТА -----
       - name: Build containers
         run: docker compose build
 
-      # ----- ЗАПУСК -----
       - name: Start services
         run: docker compose up -d
 
-      # ----- ОЖИДАНИЕ ГОТОВНОСТИ -----
       - name: Wait for Redis healthcheck
         run: |
-          echo "Waiting for Redis to become healthy..."
           for i in {1..15}; do
             STATUS=$(docker inspect --format='{{json .State.Health.Status}}' $(docker compose ps -q redis))
             if [ "$STATUS" = "\"healthy\"" ]; then
               echo "Redis is healthy!"
               exit 0
             fi
-            echo "Redis not ready yet: $STATUS"
+            echo "Redis not ready: $STATUS"
             sleep 2
           done
           echo "Redis failed to become healthy!"
           exit 1
 
-      # ----- ТЕСТЫ -----
       - name: Run Django tests
-        run: |
-          docker compose exec -T web python manage.py test
-          # или pytest:
-          # docker compose exec -T web pytest -q
+        run: docker compose exec -T web python manage.py test
 
-      # ----- ОЧИСТКА -----
       - name: Shutdown
         if: always()
         run: docker compose down --volumes --remove-orphans
