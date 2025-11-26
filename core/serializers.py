@@ -25,6 +25,7 @@ class RAMSerializer(serializers.ModelSerializer):
 
 class PhoneSerializer(serializers.ModelSerializer):
     image = serializers.ImageField(use_url=True)
+    brand = serializers.StringRelatedField()
 
     class Meta:
         model = Phone

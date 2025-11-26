@@ -48,9 +48,16 @@ class Needs(models.Model):
     def __str__(self):
         return self.name
 
+class BrandsCoefficients(models.Model):
+    name = models.CharField(max_length=255,blank=False,null=False)
+    coefficient = models.FloatField()
+
+    def __str__(self):
+        return f"{self.name}+{self.coefficient}"
+
 class Phone(models.Model):
     name = models.CharField(max_length=255,blank=False,null=False)
-    brand = models.CharField(max_length=255,blank=False,null=False)
+    brand = models.ForeignKey(BrandsCoefficients, on_delete=models.PROTECT, related_name='phones', blank=False, null=False)
     image = models.ImageField(upload_to='phones_images/',blank=False,null=False)
     ram_size = models.IntegerField(blank=True,null=True)
     memory_size = models.IntegerField(blank=True,null=True)
@@ -64,10 +71,3 @@ class Phone(models.Model):
 
     def __str__(self):
         return self.name
-
-class BrandsCoefficients(models.Model):
-    name = models.CharField(max_length=255,blank=False,null=False)
-    coefficient = models.FloatField()
-
-    def __str__(self):
-        return f"{self.name}+{self.coefficient}"

@@ -512,33 +512,33 @@ Return ONLY clean JSON, without comments, explanations, or Markdown.
 
 def get_phone_comparison_json(phone1_name: str, phone2_name: str, need_description: str = None):
     try:
-        phone1 = Phone.objects.get(name=phone1_name)
-        phone2 = Phone.objects.get(name=phone2_name)
+        phone1 = Phone.objects.select_related('brand').get(name=phone1_name)
+        phone2 = Phone.objects.select_related('brand').get(name=phone2_name)
 
         brand_coeffs = dict(BrandsCoefficients.objects.values_list('name', 'coefficient'))
 
         phone1_data = {
             "name": phone1.name,
-            "brand": phone1.brand,
+            "brand": phone1.brand.name,
             "ram_size": phone1.ram_size,
             "memory_size": phone1.memory_size,
             "processor": phone1.processor,
             "camera_mp": phone1.camera_mp,
             "battery": phone1.battery,
             "year": phone1.year,
-            "brand_coefficient": brand_coeffs.get(phone1.brand, 1.0)
+            "brand_coefficient": phone1.brand.coefficient
         }
 
         phone2_data = {
             "name": phone2.name,
-            "brand": phone2.brand,
+            "brand": phone2.brand.name,
             "ram_size": phone2.ram_size,
             "memory_size": phone2.memory_size,
             "processor": phone2.processor,
             "camera_mp": phone2.camera_mp,
             "battery": phone2.battery,
             "year": phone2.year,
-            "brand_coefficient": brand_coeffs.get(phone2.brand, 1.0)
+            "brand_coefficient": phone2.brand.coefficient
         }
 
         comparison_prompt = f"""
